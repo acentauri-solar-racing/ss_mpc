@@ -1,0 +1,28 @@
+step = linspace(0,1000000,1000000/50)
+DP_step = linspace(0,1000000, 1000000/10000)
+E_bat = interp1(DP_step, OptRes.states.E_bat(1:end-1),step)
+
+plot(DP_step,OptRes.states.E_bat(1:end-1),'o',step,E_bat,':.')
+
+save('SoC_target_DP_50m',"E_bat");
+
+%%
+
+% Assuming you have two datasets: data1 and data2
+xx100 = load('100.mat').xx;
+xx50 = load('50.mat').xx;
+
+common_length = 200; % Choose a common length for resampling
+
+% Create the x-axis for the first dataset (sampled every 100m)
+x1 = 0:100:(100 * (size(xx100,2) - 1));
+
+% Create the x-axis for the second dataset (sampled every 50m)
+x2 = 0:50:(50 * (size(xx50,2) - 1));
+
+figure;
+plot(x1, xx100, 'b', x2, data2, 'r');
+legend('Dataset 1 (100m)', 'Dataset 2 (50m)');
+xlabel('Distance (m)');
+ylabel('Data Value');
+title('Comparison of Datasets');

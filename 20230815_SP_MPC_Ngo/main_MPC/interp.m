@@ -4,4 +4,5 @@ E_bat = interp1(DP_step, OptRes.states.E_bat(1:end-1),step)
 
 plot(DP_step,OptRes.states.E_bat(1:end-1),'o',step,E_bat,':.')
 
-save('SoC_target_DP',"E_bat");
+save('SoC_target_DP_50m',"E_bat");
+

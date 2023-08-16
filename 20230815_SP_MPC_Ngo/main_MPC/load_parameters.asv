@@ -2,13 +2,12 @@
 
 %% General
 par.s_step = 100;                % [m]
+par.s_tot = 100;             % [m] simulated distance
 
-par.s_initial = 900000;          % initial position of the simulation   
-par.s_final = 3000000;           % [m] total distance (for parameters)
-par.s_tot =  30000;             % [m] simulated distance
+par.s_initial = 100000;          % init   
+par.s_final = 2000000;           % [m] total distance (for parameters
 
-
-par.N_horizon = 100;             % [-] Horizon length
+par.N_horizon = 500;             % [-] Horizon length
 
 par.v_start = 60/3.6;            % [m/s] Initial Velocity 
 par.v_max = 120/3.6;             % [m/s] Largest possible velocity 

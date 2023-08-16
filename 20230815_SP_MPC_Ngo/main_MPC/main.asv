@@ -242,8 +242,8 @@ t_prev = 1e3;
 % the main simulaton loop... the number of mpc steps is less than its maximum
 % value.
 main_loop = tic;
-iter_max = sim_dist/h;
-while iter_mpc < iter_max
+max_iter = sim_dist/h;
+while iter_mpc < max_iter
     
     % update initial state, update meteo condition prediction
     vars_update = [simvar.alpha(iter_initial+1+iter_mpc:iter_initial+N+iter_mpc); 
@@ -304,7 +304,7 @@ average_mpc_time = main_loop_time/(iter_mpc+1)
 
 
 %% Diagnostics
-diagnostics = diagnostic(iter_max, dist);
+diagnostics = diagnostic(max_iter, dist);
 % diagnostics.alwaysFeasible
 
 %%
