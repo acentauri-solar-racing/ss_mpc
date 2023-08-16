@@ -1,0 +1,20 @@
+MPC online data:
+
+INPUT:
+
+-position 
+-velocity (ev. previous values)
+-Energy Battery/State of Charge 
+-time
+
+-solar irradiation (prediction)
+-front/side wind velocity (prediction)
+-ambient temperature (prediction)
+
+-updated SoC target given from DP
+
+OUTPUT:
+
+-predicted optimal velocity for "x" km
+-predicted optimal Energy battery/SoC for "x" km
+-predicted needed optimal input of electric motor "P_el" and brakes "P_brake"
