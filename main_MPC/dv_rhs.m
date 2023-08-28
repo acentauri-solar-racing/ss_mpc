@@ -37,7 +37,7 @@ function dv = dv_rhs(par, states, controls, var)
     
 
     % velocity dynamics
-    dv = (P_mot_mec - P_a - P_g - P_r - P_b + P_brake) / (par.m_tot * v);
+    dv = (P_mot_mec + P_brake - P_a - P_g - P_r - P_b) / (par.m_tot * v);
 end
 
 

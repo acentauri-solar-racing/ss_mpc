@@ -2,31 +2,27 @@
 
 %% General
 par.s_step = 100;                % [m]
+par.s_step_DP = 10000;          % [m]
 
-par.s_initial = 900000;          % initial position of the simulation   
+par.s_initial = 0;          % initial position of the simulation   
 par.s_final = 3000000;           % [m] total distance (for parameters)
-par.s_tot =  30000;             % [m] simulated distance
+par.s_tot =  10000;             % [m] simulated distance from initial position
 
 
 par.N_horizon = 100;             % [-] Horizon length
 
-par.v_start = 60/3.6;            % [m/s] Initial Velocity 
-par.v_max = 120/3.6;             % [m/s] Largest possible velocity 
-par.v_min = 55/3.6;              % [m/s] Smallest possible velocity 
 
-% par.SoC_start = 0.7;
-% par.SoC_end = 0.695;
+par.v_max = 120/3.6;             % abs max velocity
+par.v_min = 60/3.6;
 
-%% Normalization
-par.v_0 = 120/3.6;
-par.E_bat_0 = 5200*3600;
-par.P_mot_el_0 = 5000;
+par.t_0 = 0 *60*60;                         % [s], t_0 = 0 => 8.00,
+par.hour_start = 8;
+par.hour_end = 17;
 %% Longitudinal Vehicle Dynamics
 par.rho_a = 1.17;           % [kg/m^3] air density 
 par.Af = 0.8;               % [m^2] frontal area 
 par.Cd = 0.09;              % [-] aero drag coeff 
 par.Cr = 0.003;             % [-] roll fric coeff 
-par.m_tot = 220;            % [kg] total mass 
 par.g = 9.81;               % [m/s^2] gravitational acc
 par.r_w = 0.2785;           % [m] wheel radius 
 par.N_f = 4;                % [-] #front bearings
@@ -36,6 +32,8 @@ par.T_r = 0.15;             % [Nm] friction torque back bearing
 par.m_car = 150;            % [kg] car mass
 par.m_driver = 80;          % [kg] driver mass
 par.Theta_rot = 1.1343;     % [kgm^2] Moment of Inertia rotating parts
+par.m_dt = par.Theta_rot/par.r_w^2; % [kg] mass of rotating parts
+par.m_tot = par.m_car+par.m_driver+par.m_dt; % [kg] total mass
 
 %% Electric Motor
 par.gamma_gb = 1;           % [-] transmission gear box
@@ -54,7 +52,7 @@ par.eta_PV = 0.244;         % [-] solar panel efficiency
 par.eta_wire = 0.98;        % [-] wiring efficiency
 par.eta_MPPT = 0.99;        % [-] MPPT efficiency
 par.eta_mismatch = 0.98;    % [-] Mismatch efficiency
-par.theta_STC = 298.15;     % [K] Standard Condition Temperature
+par.theta_STC = 25;         % [°C] Standard Condition Temperature
 par.G_0 = 1000;             % [W/m^2] Reference Global Irradiance
 par.lambda_PV = 0.0029;     % [1/K] Power loss coefficient
 
@@ -75,7 +73,32 @@ par.eta_coul = 1;           % [-] Coulumbic efficiency
 par.Route = load_route(par.s_step,par.s_final,par);
 par.Route.max_v(par.Route.max_v < 51/3.6) = 61/3.6;         %initial values of max v are < 60km/h, which is the minimum velocity possible
 % Loading Weather Data
-% par.Weather = Load_Weather(par);
+% Irradiance 1D time interpolation
+par.G.rawdata = load('WeatherIrradiance.mat').irradiance.Gtotal(par.hour_start*60+1:par.hour_end*60);
+par.G.t = linspace(0,60*(par.hour_end-par.hour_start),60*(par.hour_end-par.hour_start));        %vector time in MINUTES
+par.G_int = griddedInterpolant(par.G.t,par.G.rawdata);                                               %remember to convert seconds into minutes!
 
+% Temperature 2D spatial-time interpolation
+par.theta.rawdata = load("WeatherData.mat").temperature.tempMean(:,5:14); % from 8.30 to 17.30
+[par.theta.dist, par.theta.t] = ndgrid(load("WeatherData.mat").temperature.dist,linspace(0,9,10));
+par.theta_int = griddedInterpolant(par.theta.dist,par.theta.t,par.theta.rawdata);
 
-par.E_bat_target_1000km = load("SoC_target_DP.mat").E_bat*3600 % [W]
+% Front Wind 2D spatial-time interpolation
+par.wind_front.rawdata = load("WeatherData.mat").wind.frontWind(:,5:14); % from 8.30 to 17.30
+[par.wind.dist, par.wind.t] = ndgrid(load("WeatherData.mat").wind.dist(1:end-1),linspace(0,9,10));
+par.wind_front_int = griddedInterpolant(par.wind.dist,par.wind.t,par.wind_front.rawdata);
+
+% Side Wind 2D spatial-time interpolation
+par.wind_side.rawdata = load("WeatherData.mat").wind.sideWind(:,5:14); % from 8.30 to 17.30
+par.wind_side_int = griddedInterpolant(par.wind.dist,par.wind.t,par.wind_side.rawdata);
+%% DP Data 
+% Load battery target from DP
+par.E_bat_target_DP_raw = load('Full_Race_20230607_9h_30min.mat').OptRes.states.E_bat*3600; % [Wh = W * 3600s = J]
+par.E_bat_target_DP = interp1(linspace(0,300,300+1), par.E_bat_target_DP_raw, linspace(0,300,(300+1)*round(par.s_step_DP/par.s_step)));
+
+par.v_DP_raw = load('Full_Race_20230607_9h_30min.mat').OptRes.states.V; % [m/s]
+par.v_DP = interp1(linspace(0,300,300+1), par.v_DP_raw, linspace(0,300,(300+1)*round(par.s_step_DP/par.s_step)));
+
+par.P_mot_el_DP_raw = load('Full_Race_20230607_9h_30min.mat').OptRes.inputs.P_mot_el; % [m/s]
+par.v_DP = interp1(linspace(1,300,300), par.P_mot_el_DP_raw , linspace(1,300,300*round(par.s_step_DP/par.s_step)));
+

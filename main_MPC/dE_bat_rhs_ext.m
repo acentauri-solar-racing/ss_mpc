@@ -29,7 +29,7 @@ function dE_bat = dE_bat_rhs_ext(par, states, controls, var)
     %PV Model
     eta_loss = par.eta_wire * par.eta_MPPT * par.eta_mismatch;
     
-    theta_PV = theta_amb + (theta_NOCT - 20) * S / 80;
+    theta_PV = theta_amb + (theta_NOCT - 20) * S / 80; % [°C]
     eta_CF = 1 - par.lambda_PV*(theta_PV - par.theta_STC);
 
     P_PV = par.A_PV * G * par.eta_PV * eta_CF * eta_loss;
