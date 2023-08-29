@@ -100,9 +100,7 @@ for k = 1:N     %iterate from f(x_0) -> f(x_N-1)
 end
 
 g.SoC_lb = [];
-% for k = 1:N
-    g.SoC_lb = [g.SoC_lb; X(2,N+1) - P(n_states+n_vars*N+1)];     %SoC - SoC_lowerbound_predicted
-% end
+g.SoC_lb = [g.SoC_lb; X(2,N+1) - P(n_states+n_vars*N+1)];     %SoC - SoC_lowerbound_predicted
 
 % input constraints
 g.u_rate = [];
@@ -135,7 +133,7 @@ opts.ipopt.max_iter = 2000;
 opts.ipopt.print_level = 3;     %0,3,5
 opts.print_time = 0;
 opts.ipopt.acceptable_tol =1e-8; %1e-8
-opts.ipopt.acceptable_obj_change_tol = 1e-6;
+opts.ipopt.acceptable_obj_change_tol = 1e-8;
 
 solver = nlpsol('solver', 'ipopt', nlp_prob, opts);
 
@@ -148,10 +146,10 @@ args.lbg(1:n_states*(N+1)) = 0;                                                 
 args.ubg(1:n_states*(N+1)) = 0;                                                 % -> the lower and upper bound of vector g from index 1 to 3*(N+1) is 0 (equality)
 
 % constraints
-args.lbg(n_states*(N+1)+1: n_states*(N+1)+1 + (N-1)) = -inf;       % input rate boundary for P_el
+args.lbg(n_states*(N+1)+1: n_states*(N+1)+1 + (N-1)) =  -inf;       % input rate boundary for P_el
 args.ubg(n_states*(N+1)+1: n_states*(N+1)+1 + (N-1)) =  inf;
 
-args.lbg(n_states*(N+1)+1+ (N-1)+1) =   -0; %0;      % SoC - SoC_lowerbound > 0! at last time step of horizon N!
+args.lbg(n_states*(N+1)+1+ (N-1)+1) =   -par.E_bat_max*1e-5;      % SoC - SoC_lowerbound > 0! at last time step of horizon N!
 args.ubg(n_states*(N+1)+1+ (N-1)+1) =   inf;
 
 args.lbg(n_states*(N+1)+1+ (N-1)+1+1: n_states*(N+1)+1+(N-1)+1+1 + (N-1)) =  -inf;      % v(k)-v(k-1)
@@ -165,9 +163,9 @@ args.lbx(1:n_states:n_states*(N+1),1) = 0;                     %state velocity l
 args.ubx(1:n_states:n_states*(N+1),1) = 32;                     %state velocity upper bound
 
 args.lbx(2:n_states:n_states*(N+1),1) = 0.10 *par.E_bat_max;    %state state.E_bat lower bound
-args.ubx(2:n_states:n_states*(N+1),1) = 1.01 * par.E_bat_max;      %state state.E_bat upper bound
+args.ubx(2:n_states:n_states*(N+1),1) = 1.001 * par.E_bat_max;      %state state.E_bat upper bound
 
-args.lbx(3:n_states:n_states*(N+1),1) = 0;                      %state state.time lower bound
+args.lbx(3:n_states:n_states*(N+1),1) = -Inf;                      %state state.time lower bound
 args.ubx(3:n_states:n_states*(N+1),1) = Inf;                    %state state.time upper bound
 
 args.lbx(n_states*(N+1)+1:n_controls:n_states*(N+1)+n_controls*N,1) = -5000; % P_el_mot lower bound ATTENTION TO CHANGE
@@ -186,34 +184,31 @@ args.ubx(n_states*(N+1)+2:n_controls:n_states*(N+1)+n_controls*N,1) = 0; % P_bra
 
 % THE SIMULATION LOOP SHOULD START FROM HERE
 %-------------------------------------------
+
+% Start MPC
+xx1 = zeros(N+1,n_states, sim_dist/h);                        % contains the the trajectory
+u_cl=[];                         % control actions history
 %prompt = "Initial position [m/s]: ";
 %h_0 = input(prompt);
 h0 = par.s_initial;                                                 % initial start distance
 iter_initial = round(h0/par.s_step);
+iter_mpc = 0;                     % mpc iterations
 
-
-v_0 = 16;
+v_0 = par.Route.max_v(iter_initial+iter_mpc+1)*0.95;
 SoC_0 = par.E_bat_target_DP(1+iter_initial);
 t_0 = par.t_0;
 
 x0 = [v_0 ; SoC_0 ; t_0];               % initial condition.
+
+u_prev = [0; 0];                 % initial input
+v_prev = v_0;
+t_prev = t_0;
 
 xx(:,1) = x0;                    % xx contains the history of states
 dist(1) = h0;
 
 u0 = zeros(N,n_controls);        % 1 control input P_mot_el
 X0 = repmat(x0,1,N+1)';          % initialization of the states decision variables
-
-% Start MPC
-iter_mpc = 0;                     % mpc iterations
-xx1 = zeros(N+1,n_states, sim_dist/h);                        % contains the the trajectory
-u_cl=[];                         % control actions history
-u_prev = [0; 0];                 % initial input
-v_prev = v_0;
-t_prev = 1e3;
-
-xG = [];
-xtheta = [];
 
 %%
 
@@ -235,7 +230,7 @@ vars_update_pred = [simvar.alpha(iter_initial+iter_mpc+1:iter_initial+iter_mpc+1
                diag(par.theta_int({linspace(h0,h0+(N-1)*h,N),linspace(t_0, t_0+ h*N/v_0,N)}))];
 
 % update minimal/maximal velocity constraint
-args.lbx(1:n_states:n_states*(N+1),1) = par.Route.min_v(iter_initial+iter_mpc+1:iter_initial+N+1+iter_mpc); %state velocity lower bound
+args.lbx(1:n_states:n_states*(N+1),1) = 50/3.6; %par.Route.min_v(iter_initial+iter_mpc+1:iter_initial+N+1+iter_mpc); %state velocity lower bound
 args.ubx(1:n_states:n_states*(N+1),1) = par.Route.max_v(iter_initial+iter_mpc+1:iter_initial+N+1+iter_mpc); %state velocity upper bound
 
 
@@ -256,7 +251,6 @@ while iter_mpc < iter_max+1
         'lbg', args.lbg, 'ubg', args.ubg,'p',args.p);
     diary off
 
-
     % save states and input
     u = reshape(full(sol.x(n_states*(N+1)+1:end))',n_controls,N)'; % get controls only from the solution
     xx1(:,1:3,iter_mpc+1)= reshape(full(sol.x(1:n_states*(N+1)))',n_states,N+1)'; % get solution TRAJECTORY : x_0, x_1, x_2,...,x_N, x = [v, E_bat, t];
@@ -270,6 +264,8 @@ while iter_mpc < iter_max+1
     xwind_side(iter_mpc+1) = par.wind_side_int({h0,x0(3)/60/60});
     xtheta(iter_mpc+1) = par.theta_int({h0,x0(3)/60/60});
 
+    xSoC_N(iter_mpc+1) = SoC_target(iter_initial+N+iter_mpc);
+    xSoC_diff(iter_mpc+1) = xx1(end,2,iter_mpc+1) - SoC_target(iter_initial+N+iter_mpc);
 
     [h0, x0, u0] = shift(h, h0, x0, u, f, [simvar.alpha(iter_initial+iter_mpc+1); ...          % x_0 -> x_1
                                        par.G_int(x0(3)/60);
@@ -285,7 +281,7 @@ while iter_mpc < iter_max+1
                        diag(par.theta_int({linspace(h0,h0+(N-1)*h,N),xx1(2:end,3,iter_mpc+1)/60/60}))];     % h0 <- h + h0 
 
     % shift the maximal velocity constraint
-    args.lbx(1:n_states:n_states*(N+1),1) = par.Route.min_v(iter_initial+iter_mpc+1 +1:iter_initial+N+1+iter_mpc +1); %state velocity lower bound
+    %args.lbx(1:n_states:n_states*(N+1),1) = par.Route.min_v(iter_initial+iter_mpc+1 +1:iter_initial+N+1+iter_mpc +1); %state velocity lower bound
     args.ubx(1:n_states:n_states*(N+1),1) = par.Route.max_v(iter_initial+iter_mpc+1 +1:iter_initial+N+1+iter_mpc +1); %state velocity upper bound
 
     v_prev = x0(2);
