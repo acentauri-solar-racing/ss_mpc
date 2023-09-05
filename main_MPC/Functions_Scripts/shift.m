@@ -9,14 +9,14 @@ function [h0, x0, u0] = shift(h, h0, x0, u, f, vars)
 st = x0;
 con = u(1,:)';
 
-% k1 = f(st, con, vars); 
-% k2 = f(st + (h/st(1))/2*k1, con, vars);     % reminder h = ds, st(1) = v, dt = ds/v
-% k3 = f(st + (h/st(1))/2*k2, con, vars); 
-% k4 = f(st + (h/st(1))*k3, con, vars); 
-% st = st + (h/st(1))/6*(k1 +2*k2 +2*k3 +k4); %RK 4th order method    
+k1 = f(st, con, vars); 
+k2 = f(st + (h/st(1))/2*k1, con, vars);     % reminder h = ds, st(1) = v, dt = ds/v
+k3 = f(st + (h/st(1))/2*k2, con, vars); 
+k4 = f(st + (h/st(1))*k3, con, vars); 
+st = st + (h/st(1))/6*(k1 +2*k2 +2*k3 +k4); %RK 4th order method    
 
-f_value = f(st,con,vars);
-st = st+ ((h/st(1))*f_value);               % dt = ds/dv;
+% f_value = f(st,con,vars);
+% st = st+ ((h/st(1))*f_value);               % dt = ds/dv;
 
 
 x0 = full(st);                              % update x0 with new state

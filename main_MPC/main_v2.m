@@ -49,6 +49,10 @@ P = SX.sym('P', n_states + N*n_vars +1 +1 + 1 +1);               % parameters: [
 
 X = SX.sym('X', n_states, (N+1));                   % A Matrix that represents the states over the optimization problem.
 
+% slack variable for loosening battery constraint
+S = SX.sym('S', 1, 1);
+
+
 % initialize objective function and constraints vector
 obj = 0;                                            % Objective function
 g_nlp = [];                                             % constraints vector
@@ -87,16 +91,16 @@ for k = 1:N     %iterate from f(x_0) -> f(x_N-1)
     st_next = X(:,k+1);                                                   % "next state"  
 
     %multi-shooting
-%     k1 = f(st, con, w);                                                   % RK weights 
-%     k2 = f(st + (h/st(1))/2*k1, con, w);                                  % reminder h = ds, st(1) = v, dt = ds/v
-%     k3 = f(st + (h/st(1))/2*k2, con, w);         
-%     k4 = f(st + (h/st(1))*k3, con, w);           
-%     st_next_RK4= st + (h/st(1))/6*(k1 +2*k2 +2*k3 +k4);                   % update next state using RK 4th order    % recall dt = ds/state.v, here dt = h/st(1) 
-%     g.st_next = [g.st_next; st_next-st_next_RK4];                         % compute constraints of updating states 
+    k1 = f(st, con, w);                                                   % RK weights 
+    k2 = f(st + (h/st(1))/2*k1, con, w);                                  % reminder h = ds, st(1) = v, dt = ds/v
+    k3 = f(st + (h/st(1))/2*k2, con, w);         
+    k4 = f(st + (h/st(1))*k3, con, w);           
+    st_next_RK4= st + (h/st(1))/6*(k1 +2*k2 +2*k3 +k4);                   % update next state using RK 4th order    % recall dt = ds/state.v, here dt = h/st(1) 
+    g.st_next = [g.st_next; st_next-st_next_RK4];                         % compute constraints of updating states 
 
-  f_value = f(st,con,w);                                % dx(k)
-  st_next_euler = st+ ((h/st(1))*f_value);              % updated x(k+1) = x(k) + dt*dx(k), predicted next stage using euler forward, dt = ds/dv
-  g.st_next = [g.st_next;st_next-st_next_euler];         % compute constraints
+%   f_value = f(st,con,w);                                % dx(k)
+%   st_next_euler = st+ ((h/st(1))*f_value);              % updated x(k+1) = x(k) + dt*dx(k), predicted next stage using euler forward, dt = ds/dv
+%   g.st_next = [g.st_next;st_next-st_next_euler];         % compute constraints
 end
 
 g.SoC_lb = [];
