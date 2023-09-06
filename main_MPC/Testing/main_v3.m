@@ -9,16 +9,19 @@ addpath("Model\");
 addpath("OfflineData\");
 addpath("OnlineData\");
 
+par = load_parameters();
+
 load_parameters  %"par" struct
 
 % define optimization horizon
 h = par.s_step;           % [m] sampling distance % h = par.s_step
 N = par.N_horizon;        % [-] prediction horizon % N = par.N_horizon
-sim_dist = par.s_tot; % Maximum simulation distance
 
 %% Define variables for optimizer CasaDi
 
 % states: velocity, state of charge, state.time
+
+[f, obj, X, U, P, S] = initialize_MPC(par);
 
 state.v = SX.sym('state.v');
 state.E_bat = SX.sym('state.E_bat');
@@ -56,12 +59,9 @@ P = SX.sym('P', n_states + N*n_vars +1 +1 + 1 +1);               % parameters: [
 % slack variable for loosening battery constraint
 S = SX.sym('S', 1, 1); 
 
-
-% initialize objective function and constraints vector
-obj = 0;                                            % Objective function
-g_nlp = [];                                             % constraints vector
-
 %% OBJECTIVE FUNCTION
+
+obj = 0;                                            % Objective function
 for k = 1:N     %iterate from f(x_0) -> f(x_N-1)
     st = X(:,k);  
     con = U(:,k);  
@@ -81,6 +81,10 @@ obj = obj + par.slack_weight * S;
 
 % P = [x_0(n_states);grade(N);inclination(N);var.v_front(N);var.v_side(N); amb_temp(N); U(k-1)(1); SoC_target_lastN(1);X(2,k-1)(1);X(3,k-1)(1)]
 % objective functions and multishooting equality constraints
+
+% initialize objective function and constraints vector
+g_nlp = [];                                             % constraints vector
+
 st  = X(:,1); % initial state x(k) = x(0)
 g.x0 = st-P(1:3); % initial condition constraints
 
@@ -107,31 +111,12 @@ for k = 1:N     %iterate from f(x_0) -> f(x_N-1)
     st_next = X(:,k+1);                                                   % "next state"  
 
     g.st_next = [g.st_next; st_next-st_next_RK4];                         % compute constraints of updating states 
-
-%   f_value = f(st,con,w);                                % dx(k)
-%   st_next_euler = st+ ((h/st(1))*f_value);              % updated x(k+1) = x(k) + dt*dx(k), predicted next stage using euler forward, dt = ds/dv
-%   g.st_next = [g.st_next;st_next-st_next_euler];         % compute constraints
 end
 
 g.SoC_lb = [X(2,N+1) - P(n_states+n_vars*N+1) + S];     %SoC - SoC_lowerbound_predicted 
 
-% input constraints
-g.u_rate = [];
-g.u_rate = [g.u_rate; P(n_states+n_vars*N+1 +1) - U(1,1)] ;   %U(0) - U(1)     
-for k = 1:N-1
-    g.u_rate = [g.u_rate; U(1,k) - U(1,k+1)];
-end
-
-
-% acceleration constraint
-g.acc = [];
-g.acc = [g.acc; (X(2,1) - P(n_states+n_vars*N+1+1 + 1))] ;   %V(1) - V(0)     % P = [x_0(n_states);grade(N);inclination(N);var.v_front(N);var.v_side(N); amb_temp(N); U(k-1)(1); SoC_target_lastN(1);X(2,k-1)(1);X(3,k-1)(1)]
-for k = 1:N-1
-    g.acc = [g.acc; (X(2,k+1) - X(2,k))];
-end
-
 % compose final constraints vector 
-g_nlp = [g_nlp; g.x0; g.st_next; g.u_rate; g.SoC_lb; g.acc];
+g_nlp = [g_nlp; g.x0; g.st_next; g.SoC_lb];
 
 
 %% define constraints rhs value
@@ -143,15 +128,8 @@ args.lbg(1:n_states*(N+1)) = 0;                                                 
 args.ubg(1:n_states*(N+1)) = 0;                                                 % -> the lower and upper bound of vector g from index 1 to 3*(N+1) is 0 (equality)
 
 % constraints
-args.lbg(n_states*(N+1)+1: n_states*(N+1)+1 + (N-1)) =  -inf;       % input rate boundary for P_el
-args.ubg(n_states*(N+1)+1: n_states*(N+1)+1 + (N-1)) =  inf;
-
-args.lbg(n_states*(N+1)+1+ (N-1)+1) =   0;      % SoC - SoC_lowerbound > 0! at last time step of horizon N!
-args.ubg(n_states*(N+1)+1+ (N-1)+1) =   inf;
-
-args.lbg(n_states*(N+1)+1+ (N-1)+1+1: n_states*(N+1)+1+(N-1)+1+1 + (N-1)) =  -inf;      % v(k)-v(k-1)
-args.ubg(n_states*(N+1)+1+ (N-1)+1+1: n_states*(N+1)+1+(N-1)+1+1 + (N-1)) =   inf;       % 
-
+args.lbg(n_states*(N+1)+1) =   0;      % SoC - SoC_lowerbound > 0! at last time step of horizon N!
+args.ubg(n_states*(N+1)+1) =   inf;
 
 
 % define boundary decision variables "OPT_variables"
@@ -174,6 +152,7 @@ args.ubx(n_states*(N+1)+2:n_controls:n_states*(N+1)+n_controls*N,1) = 0; % P_bra
 %slack variable constraint
 args.lbx(n_states*(N+1)+n_controls*N +1,1) = 0; % 
 args.ubx(n_states*(N+1)+n_controls*N +1,1) = inf; % must be positive 
+
 
 %% Create solver
 % make the decision variable one column vector
@@ -201,7 +180,7 @@ solver = nlpsol('solver', 'ipopt', nlp_prob, opts);
 %-------------------------------------------
 
 % Start MPC
-xx1 = zeros(N+1,n_states, sim_dist/h);                        % contains the the trajectory
+xx1 = zeros(N+1,n_states, par.s_tot/h);                        % contains the the trajectory
 u_cl=[];                         % control actions history
 %prompt = "Initial position [m/s]: ";
 %h_0 = input(prompt);
@@ -256,7 +235,7 @@ args.ubx(1:n_states:n_states*(N+1),1) = par.Route.max_v(iter_initial+iter_mpc+1:
 % the main simulaton loop... the number of mpc steps is less than its maximum
 % value.
 main_loop = tic;
-iter_max = sim_dist/h;
+iter_max = par.s_tot/h;
 while iter_mpc < iter_max+1
     dist(iter_mpc+1) = h0;
 
