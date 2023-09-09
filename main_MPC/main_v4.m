@@ -4,13 +4,20 @@ clc
 
 %% Define model and functions
 import casadi.*
+
+addpath('..\..\ss_offline_data\parameters');
+
 addpath("Functions_Scripts\");
 addpath("Model\");
 addpath("OfflineData\");
 addpath("OnlineData\");
 
-% (discretization step, horizon length, simulated distance, slack weight)
-par = load_parameters(100, 10, 1000, 1e-3);
+%% Load parameters
+
+% common car parameters
+par = get_car_param();
+% (par struct, s_0, t_0, discretization step, horizon length, simulated distance, slack weight)
+par = get_mpc_param(par, 0, 0, 100, 10, 1000, 1e-3);
 
 %% Define variables for optimizer CasaDi
 [par, f, obj, X, U, P, S] = initialize_MPC(par);

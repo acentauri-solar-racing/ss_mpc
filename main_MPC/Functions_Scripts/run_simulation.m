@@ -2,6 +2,9 @@
 % This code was written with MATLAB R2022b. Errors may occur with other
 % versions, last updated: 06.09.2023
 %% Description 
+% This function initializes all the variables needed for the mpc simulation
+% loop, run the actual simulation and stores the results 
+
 % INPUT: 
 % "par": parameters struct,
 % "args": argument struct needed for solver

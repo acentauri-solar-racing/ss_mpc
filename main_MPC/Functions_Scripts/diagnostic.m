@@ -1,3 +1,19 @@
+%% Ngo Tony
+% This code was written with MATLAB R2022b. Errors may occur with other
+% versions, last updated: 06.09.2023
+%% Description 
+% This function output wheter there have been any infeasibilities in the
+% solver
+
+% INPUT: 
+% "max_iter": maximum number of iteration of the mpc simulation
+% "dist": distance vector 
+
+% OUTPUT : 
+% "diagnostics": diagnostics results
+
+%%
+
 function [diagnostics] = diagnostic(max_iter,dist)
     %DIAGNOSTIC Summary of this function goes here
     %   Detailed explanation goes here

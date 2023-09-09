@@ -2,6 +2,9 @@
 % This code was written with MATLAB R2022b. Errors may occur with other
 % versions, last updated: 06.09.2023
 %% Description 
+% This function shifts in the simulation loop the actual dynamics to the
+% next dynamics
+
 % INPUT: 
 % "s_step": discretization step
 % "s_0": position at the moment before the shift
@@ -15,6 +18,7 @@
 % "x0": new initial conditions after shift
 % "u0": input prediction after shift
 
+%
 %%
 function [s_0, x0, u0] = shift(s_step, s_0, x0, u, f, vars)
     st = x0;

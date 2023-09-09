@@ -2,6 +2,9 @@
 % This code was written with MATLAB R2022b. Errors may occur with other
 % versions, last updated: 06.09.2023
 %% Description 
+% This function creates the optimizer solver used in the simulation loop;
+% the solver is IPOPT
+
 % INPUT: 
 % "par": parameters struct,
 % "obj": cost function,
@@ -17,6 +20,8 @@
 % OUTPUT : 
 % "solver": optimization solver to be used to find optimal states and
 % controls
+
+%
 %%
 function solver = initialize_solver(par, obj, g_nlp, X, U, P, S)
     %import casadi.* package

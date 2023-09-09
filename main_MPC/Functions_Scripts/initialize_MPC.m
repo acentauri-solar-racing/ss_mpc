@@ -2,6 +2,13 @@
 % This code was written with MATLAB R2022b. Errors may occur with other
 % versions, last updated: 06.09.2023
 %% Description 
+% This function initializes the symbolic variable and functions using
+% casADi that are used in the solver optimization and throughout the entire
+% code.
+% To learn more about MPC and casADi it's HIGHLY suggested to watch this
+% tutorial video 
+% https://www.youtube.com/watch?v=RrnkPrcpyEA
+
 % INPUT: 
 % "par", parameters struct (see function "load parameters")
 

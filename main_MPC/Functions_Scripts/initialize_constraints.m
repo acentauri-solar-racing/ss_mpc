@@ -2,6 +2,14 @@
 % This code was written with MATLAB R2022b. Errors may occur with other
 % versions, last updated: 06.09.2023
 %% Description 
+% This function initializes the constraints used in the MPC.
+% It first defines the symbolic constraint functions in the vector "g_nlp"
+% and set later the lower/upper boundaries in the "args" struct, of both
+% constraints and state/control variables
+
+% args.lbg <= g_nlp <= args.ubg
+% args.lbx <= opt_variables <= args.ubx
+
 % INPUT: 
 % "par": parameters struct,
 % "f": symbolic initialization function of system dynamics to be used in
@@ -33,6 +41,7 @@
 %         "args.ubx": contains upper bounds for optimization variables vector 
 %          N.B. optimization variables vector contains states prediction,
 %          control input prediction, slack variable
+
 %%
 function [par, g_nlp, args] = initialize_constraints(par, f, X, U, P, S)
     %% Define constraints vector
