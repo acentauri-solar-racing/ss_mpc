@@ -93,7 +93,7 @@ function [par, OptRes] = run_simulation(par, args, f, solver, s_0, t_0)
     %% Simulation Loop
     
     main_loop = tic;
-    while par.iter_mpc < par.iter_mpc_max+1
+    while par.iter_mpc < par.iter_mpc_max
     
         % update actual position 
         OptRes.xdist(par.iter_mpc+1) = s_0;
@@ -124,7 +124,7 @@ function [par, OptRes] = run_simulation(par, args, f, solver, s_0, t_0)
         OptRes.xS(par.iter_mpc+1) = S0;
         
         % store weather condition Data
-        OptRes.xG(par.iter_mpc+1) =  par.G_int(x0(3)/60);
+        OptRes.xG(par.iter_mpc+1) =  par.G_int(x0(3)/60)+rand*10-rand*10;
         OptRes.xwind_front(par.iter_mpc+1) = par.wind_front_int({s_0,x0(3)/60/60});
         OptRes.xwind_side(par.iter_mpc+1) = par.wind_side_int({s_0,x0(3)/60/60});
         OptRes.xtheta(par.iter_mpc+1) = par.theta_int({s_0,x0(3)/60/60});
@@ -137,7 +137,7 @@ function [par, OptRes] = run_simulation(par, args, f, solver, s_0, t_0)
     
         % advance simulation, update real plant
         [s_0, x0, u0] = shift(par.s_step, s_0, x0, u, f, [simvar.alpha(par.iter_initial+par.iter_mpc+1); ...          
-                                           par.G_int(x0(3)/60);
+                                           OptRes.xG(par.iter_mpc+1);
                                            par.wind_front_int({s_0,x0(3)/60/60}); ...
                                            par.wind_side_int({s_0,x0(3)/60/60}); ...
                                            par.theta_int({s_0,x0(3)/60/60})]);
