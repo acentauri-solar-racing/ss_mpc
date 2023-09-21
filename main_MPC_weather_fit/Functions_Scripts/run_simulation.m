@@ -80,7 +80,7 @@ function [par, OptRes] = run_simulation(par, args, f, solver, s_0, t_0)
     SoC_target = par.E_bat_target_DP;
     
     % initialize polynomial fit of G
-    [par.G_1, par.G_2, par.G_3] = get_G(par, 0, 0+ 3600);
+    [par.G_1, par.G_2, par.G_3] = get_G(par, 0, 0+ 300);
 
     % initialize parameters/prediction (warm start)
     vars_update_pred = [simvar.alpha(par.iter_initial+par.iter_mpc+1:par.iter_initial+par.iter_mpc+1+(par.N-1)); 
@@ -151,7 +151,7 @@ function [par, OptRes] = run_simulation(par, args, f, solver, s_0, t_0)
                                            par.G_3]);
     
         % update G polynomial fit
-        [par.G_1, par.G_2, par.G_3] = get_G(par, x0(3), x0(3) + 3600);
+        [par.G_1, par.G_2, par.G_3] = get_G(par, x0(3), x0(3) + 300);
 
         % update the weather/road variables
         vars_update_pred = [simvar.alpha(par.iter_initial+par.iter_mpc+1 +1:par.iter_initial+par.iter_mpc+1+(par.N-1) +1); 

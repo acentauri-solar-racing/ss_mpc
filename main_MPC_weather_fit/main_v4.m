@@ -17,7 +17,7 @@ addpath("OnlineData\");
 % common car parameters
 par = get_car_param();
 % (par struct, s_0, t_0, discretization step, horizon length, simulated distance, slack weight)
-par = get_mpc_param(par, 0, 0, 100, 10, 300000, 1e-3);
+par = get_mpc_param(par, 0, 0, 100, 10, 50000, 1e-3);
 
 %% Define variables for optimizer CasaDi
 [par, f, obj, X, U, P, S] = initialize_MPC(par);
