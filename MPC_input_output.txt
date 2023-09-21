@@ -2,9 +2,9 @@ MPC online data:
 
 INPUT:
 
--position 
+-position
 -velocity (ev. previous values)
--Energy Battery/State of Charge 
+-Energy Battery/State of Charge
 -time
 
 -solar irradiation (prediction)
