@@ -50,12 +50,9 @@ function [par, f, obj, X, U, P, S] = initialize_MPC(par)
     var.v_side = SX.sym('var.v_side');             
     var.theta_amb = SX.sym('var.theta_amb');    
 
-    var.G_1 = SX.sym('var.G_1');
-    var.G_2 = SX.sym('var.G_2');                        
-    var.G_3 = SX.sym('var.G_3');                        
+    var.G = sym('G', [1, par.n_waves*3]);                      
 
-
-    variables = [var.alpha; var.v_front; var.v_side; var.theta_amb; var.G_1; var.G_2; var.G_3];
+    variables = [var.alpha; var.v_front; var.v_side; var.theta_amb; var.G];
     par.n_vars = length(variables);
     
     % setup symbolic state dynamics right hand side 
@@ -73,7 +70,7 @@ function [par, f, obj, X, U, P, S] = initialize_MPC(par)
     U = SX.sym('U', par.n_controls, par.N);     
 
     % setup symbolic definition of parameters over the entire horizon
-    P = SX.sym('P', par.n_states + par.N*4 +3 +1);               
+    P = SX.sym('P', par.n_states + par.N*4 + par.N_waves*3 +1);               
     
     % setup symbolic definition of slack variable, needed only for the last
     % prediction horizon point

@@ -69,9 +69,7 @@ function [par, g_nlp, args] = initialize_constraints(par, f, X, U, P, S)
              P(par.n_states+par.N + k);                        % front wind
              P(par.n_states+par.N+par.N + k);                  % side wind
              P(par.n_states+par.N+par.N+par.N + k);            % temperature
-             P(par.n_states+par.N+par.N+par.N+par.N + 1);      % G_1
-             P(par.n_states+par.N+par.N+par.N+par.N + 2);      % G_2
-             P(par.n_states+par.N+par.N+par.N+par.N + 3);      % G_3
+             P(par.n_states+par.N+par.N+par.N+par.N+1: par.n_states+par.N+par.N+par.N+par.N+1+par.n_waves*3); % G
              ];     % 
             
         % Runge Kutta 4th order, compute x(k+1) = f(x_opt(k),u_opt(k),w(k))

@@ -80,17 +80,19 @@ function [par, OptRes] = run_simulation(par, args, f, solver, s_0, t_0)
     SoC_target = par.E_bat_target_DP;
     
     % initialize polynomial fit of G used for the MPC prediction
-    par.G_var = get_G(par.n_waves,par.G_MPC, 0, 0+ par.N*par.s_step/16.6);
+    par.G_par = get_G(par.n_waves,par.G_MPC, 0, 0+ par.N*par.s_step/16.6);
 
     % initialize polynomial fit of G used for real conditions shift
-    par.G_var_shift = get_G(par.n_waves,par.G_real, 0, 0+ par.N*par.s_step/16.6);
+    par.G_par_shift = get_G(par.n_waves,par.G_real, 0, 0+ 180);
 
     % initialize parameters/prediction (warm start)
     vars_update_pred = [simvar.alpha(par.iter_initial+par.iter_mpc+1:par.iter_initial+par.iter_mpc+1+(par.N-1)); 
                         linspace(0,0, par.N)';                    
                         linspace(0,0, par.N)'; 
                         linspace(25, 25, par.N)';
-                        par.G_var];
+                        par.G_1;
+                        par.G_2;
+                        par.G_3];
     
     % initialize minimal/maximal velocity constraint
     args.lbx(1:par.n_states:par.n_states*(par.N+1),1) = 55/3.6; %par.Route.min_v(par.iter_initial+par.iter_mpc+1:par.iter_initial+par.N+1+par.iter_mpc);
@@ -148,20 +150,23 @@ function [par, OptRes] = run_simulation(par, args, f, solver, s_0, t_0)
                                            0; ...
                                            0; ...
                                            25; ...
-                                           par.G_var_shift]);
+                                           par.G_1_shift; ...
+                                           par.G_2_shift; ...
+                                           par.G_3_shift]);
     
         % update G polynomial fit
-        par.G_var = get_G(par.n_waves,par.G_MPC, x0(3), x0(3) + par.N*par.s_step/16.6);
-
+        [par.G_1, par.G_2, par.G_3] = get_G(par.n_waves,par.G_MPC, x0(3), x0(3) + 600);
         % update real G polynomial
-        par.G_var_shift = get_G(par.n_waves,par.G_real, x0(3), x0(3) + par.N*par.s_step/16.6);
+        [par.G_1_shift, par.G_2_shift, par.G_3_shift] = get_G(par.n_waves,par.G_real, x0(3), x0(3)+ 180);
 
         % update the weather/road variables for the MPC
         vars_update_pred = [simvar.alpha(par.iter_initial+par.iter_mpc+1 +1:par.iter_initial+par.iter_mpc+1+(par.N-1) +1); 
                            linspace(0,0, par.N)';                    
                            linspace(0,0, par.N)'; 
                            linspace(25, 25, par.N)';
-                           par.G_var];     
+                           par.G_1;
+                           par.G_2;
+                           par.G_3];     
     
         % update the maximal velocity constraint
         %args.lbx(1:par.n_states:par.n_states*(par.N+1),1) = par.Route.min_v(par.iter_initial+par.iter_mpc+1 +1:par.iter_initial+par.N+1+par.iter_mpc +1); %state velocity lower bound

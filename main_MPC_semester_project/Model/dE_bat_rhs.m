@@ -31,10 +31,13 @@ function dE_bat = dE_bat_rhs(par, states, controls, var)
     v_eff = sqrt(v_eff_side^2 + v_eff_front^2);
     theta_amb = var(4);
     
-    G_1 = var(5);
-    G_2 = var(6);
-    G_3 = var(7);
-    G = G_1*(t/60)^2 + G_2*(t/60) + G_3;
+    G = 0;
+    for i = 1:par.n_waves
+        A = var((i - 1) * 3 + 5);
+        B = var((i - 1) * 3 + 6);
+        C = var((i - 1) * 3 + 7);
+        G = G + A * sin(B * t + C);
+    end
 
     theta_NOCT = 50;             % [°C]
     S = 80;                     % [mW/cm^2]

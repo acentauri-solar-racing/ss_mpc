@@ -48,12 +48,16 @@ function par = get_mpc_param(par, s_0, t_0, s_step, N, s_tot, slack_weight)
         par.Route.max_v(par.Route.max_v < 51/3.6) = 61/3.6;         %initial values of max v are < 60km/h, which is the minimum velocity possible
         % Loading Weather Data
         % Irradiance 1D time interpolation
+
+        %% Irradiance
         %par.G. = load('OnlineData\WeatherIrradiance.mat').irradiance.Gtotal(par.hour_start*60+1:par.hour_end*60);
         par.G_MPC = load('OnlineData\G_MPC').G_MPC;
         par.G_real = load('OnlineData\G_real').G_real;
-%         par.G.t = linspace(0,60*(par.hour_end-par.hour_start),60*(par.hour_end-par.hour_start));        %vector time in MINUTES
-%         par.G_int = griddedInterpolant(par.G.t,par.G.rawdata);                                               %remember to convert seconds into minutes!
-        
+%       par.G.t = linspace(0,60*(par.hour_end-par.hour_start),60*(par.hour_end-par.hour_start));        %vector time in MINUTES
+%       par.G_int = griddedInterpolant(par.G.t,par.G.rawdata);                                               %remember to convert seconds into minutes!
+
+        par.n_waves = 30;
+        %%
         % Temperature 2D spatial-time interpolation
         par.theta.rawdata = load("OnlineData\WeatherData.mat").temperature.tempMean(:,5:14); % from 8.30 to 17.30
         [par.theta.dist, par.theta.t] = ndgrid(load("OnlineData\WeatherData.mat").temperature.dist,linspace(0,9,10));
@@ -81,5 +85,5 @@ function par = get_mpc_param(par, s_0, t_0, s_step, N, s_tot, slack_weight)
         par.P_mot_el_DP_raw = load('OfflineData\Full_Race_20230607_9h_30min.mat').OptRes.inputs.P_mot_el; % [m/s]
         par.P_mot_el_DP = interp1(linspace(1,300,300), par.P_mot_el_DP_raw , linspace(1,300,300*round(par.s_step_DP/par.s_step)));
         
-
+        
 end
