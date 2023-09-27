@@ -1,0 +1,1 @@
+function [G_1; G_2; G_3] = get_G(par,t_0)

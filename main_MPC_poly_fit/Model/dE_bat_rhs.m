@@ -22,23 +22,31 @@ function dE_bat = dE_bat_rhs(par, states, controls, var)
     P_mot_el = controls(1);     % electric motor power
     
     % space dependent parameters
-    alpha = var(1);             % road inclination
 
-    v_front = var(2);           % front wind velocity
-    v_side = var(3);            % side wind velocity
+    % road inclination
+    alpha = var(1);             
+    
+    % front wind velocity
+    v_front = var(2);           
+    
+    % side wind velocity
+    v_side = var(3);            
+
     v_eff_front = v_front + v;
     v_eff_side = v_side;
     v_eff = sqrt(v_eff_side^2 + v_eff_front^2);
+
     theta_amb = var(4);
     
+    % solar irradiation
     G_1 = var(5);
     G_2 = var(6);
     G_3 = var(7);
-    G = G_1*(t/60)^2 + G_2*(t/60) + G_3;
-
+    G = G_1*(t/60/15)^2 + G_2*(t/60/15) + G_3;          %t -> [s], G data are described every 15 minutes
+    
     theta_NOCT = 50;             % [°C]
     S = 80;                     % [mW/cm^2]
-
+    
     %PV Model
     % eta_loss = par.eta_wire * par.eta_MPPT * par.eta_mismatch;
     

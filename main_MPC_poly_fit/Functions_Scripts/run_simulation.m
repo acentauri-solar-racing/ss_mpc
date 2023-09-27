@@ -80,7 +80,7 @@ function [par, OptRes] = run_simulation(par, args, f, solver, s_0, t_0)
     SoC_target = par.E_bat_target_DP;
     
     % initialize polynomial fit of G
-    [par.G_1, par.G_2, par.G_3] = get_G(par, 0, 0+ 300);
+    [par.G_1, par.G_2, par.G_3] = get_G(par.G_data, 0, 0+ 300);
 
     % initialize parameters/prediction (warm start)
     vars_update_pred = [simvar.alpha(par.iter_initial+par.iter_mpc+1:par.iter_initial+par.iter_mpc+1+(par.N-1)); 
@@ -129,7 +129,7 @@ function [par, OptRes] = run_simulation(par, args, f, solver, s_0, t_0)
         OptRes.xS(par.iter_mpc+1) = S0;
         
         % store weather condition Data
-        OptRes.xG(par.iter_mpc+1) = par.G_1*(x0(3)/60)^2 + par.G_2*(x0(3)/60) + par.G_3;
+        OptRes.xG(par.iter_mpc+1) = par.G_1*(x0(3)/60/15)^2 + par.G_2*(x0(3)/60/15) + par.G_3;
         OptRes.xwind_front(par.iter_mpc+1) = par.wind_front_int({s_0,x0(3)/60/60});
         OptRes.xwind_side(par.iter_mpc+1) = par.wind_side_int({s_0,x0(3)/60/60});
         OptRes.xtheta(par.iter_mpc+1) = par.theta_int({s_0,x0(3)/60/60});
@@ -151,7 +151,7 @@ function [par, OptRes] = run_simulation(par, args, f, solver, s_0, t_0)
                                            par.G_3]);
     
         % update G polynomial fit
-        [par.G_1, par.G_2, par.G_3] = get_G(par, x0(3), x0(3) + 300);
+        [par.G_1, par.G_2, par.G_3] = get_G(par.G_data, x0(3), x0(3) + 300);
 
         % update the weather/road variables
         vars_update_pred = [simvar.alpha(par.iter_initial+par.iter_mpc+1 +1:par.iter_initial+par.iter_mpc+1+(par.N-1) +1); 

@@ -18,20 +18,34 @@ function dv = dv_rhs(par, states, controls, var)
     
     % states x and control u
     v = states(1);              % velocity
-    E_bat = states(2);            % state of charge
+    E_bat = states(2);          % state of charge
+    t = states(3);              % time
+
     P_mot_el = controls(1);     % electric motor power
     P_brake = controls(2);
 
-    % space dependent parameters 
-    alpha = var(1);             % road inclination
-    G = var(2);                 % irradiation
-    v_front = var(3);           % front wind velocity
-    v_side = var(4);            % side wind velocity
-    theta_amb = var(5);
+    % space dependent parameters
+
+    % road inclination
+    alpha = var(1);             
+    
+    % front wind velocity
+    v_front = var(2);           
+    
+    % side wind velocity
+    v_side = var(3);            
 
     v_eff_front = v_front + v;
     v_eff_side = v_side;
     v_eff = sqrt(v_eff_side^2 + v_eff_front^2);
+
+    theta_amb = var(4);
+    
+    % solar irradiation
+    G_1 = var(5);
+    G_2 = var(6);
+    G_3 = var(7);
+    G = G_1*(t/60)^2 + G_2*(t/60) + G_3;
 
     % longitudinal power losses
     P_a = 0.5* par.rho_a * par.Cd * par.Af * (v_eff_front)^2 * v;                 % aerodynamic loss

@@ -42,7 +42,8 @@ function par = get_mpc_param(par, s_0, t_0, s_step, N, s_tot, slack_weight)
         %% Route and Weather 
         % Interpolated Data 
         % To be changed with updated data
-
+        
+        [par.timeline_weather, par.cumdist_weather, par.G_data, par.fW_data, par.sW_data, par.temp_data] = load_weather();
         % Loading Route Data
         par.Route = load_route(par.s_step,par.s_final,par);
         par.Route.max_v(par.Route.max_v < 51/3.6) = 61/3.6;         %initial values of max v are < 60km/h, which is the minimum velocity possible
@@ -65,6 +66,8 @@ function par = get_mpc_param(par, s_0, t_0, s_step, N, s_tot, slack_weight)
         % Side Wind 2D spatial-time interpolation
         par.wind_side.rawdata = load("OnlineData\WeatherData.mat").wind.sideWind(:,5:14); % from 8.30 to 17.30
         par.wind_side_int = griddedInterpolant(par.wind.dist,par.wind.t,par.wind_side.rawdata);
+
+
         %% DP Data 
         % Load battery target from DP
         % Should be adapted with new data

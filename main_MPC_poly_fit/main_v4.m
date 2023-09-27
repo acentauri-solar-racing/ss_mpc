@@ -8,6 +8,8 @@ import casadi.*
 addpath('..\..\ss_offline_data\parameters');
 
 addpath("Functions_Scripts\");
+addpath("Functions_Scripts\load_function\");
+addpath("Functions_Scripts\fit_weather\");
 addpath("Model\");
 addpath("OfflineData\");
 addpath("OnlineData\");
