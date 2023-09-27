@@ -130,8 +130,7 @@ function [par, OptRes] = run_simulation(par, args, f, solver, s_0, t_0)
         OptRes.xS(par.iter_mpc+1) = S0;
         
         % store weather condition Data
-        OptRes.xG_MPC(par.iter_mpc+1) = par.G_1*(x0(3)/60)^2 + par.G_2*(x0(3)/60) + par.G_3;
-        OptRes.xG(par.iter_mpc+1) = par.G_1_shift*(x0(3)/60)^2 + par.G_2_shift*(x0(3)/60) + par.G_3_shift;
+        OptRes.xG(par.iter_mpc+1) = G_model(par.G_var, x0(3), par.n_waves);
         OptRes.xwind_front(par.iter_mpc+1) = par.wind_front_int({s_0,x0(3)/60/60});
         OptRes.xwind_side(par.iter_mpc+1) = par.wind_side_int({s_0,x0(3)/60/60});
         OptRes.xtheta(par.iter_mpc+1) = par.theta_int({s_0,x0(3)/60/60});

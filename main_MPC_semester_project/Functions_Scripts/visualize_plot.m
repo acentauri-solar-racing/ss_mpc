@@ -190,12 +190,19 @@ set(gca, 'XTickLabel', new_tick_labels);
 
 subplot(4,1,4)
 plot(OptRes.xG), hold on;
-plot(OptRes.xG_MPC)
+% plot(OptRes.xG_MPC)
 title('Solar Irradiation' )
 legend('G (Real)', 'G (Expected by MPC)')
 xlim([0 par.s_tot/par.s_step])
 xlabel('[km]')
 ylabel('[w/m^2]')
+
+% Calculate the new tick positions and labels
+new_tick_positions = get(gca, 'XTick');
+new_tick_labels = arrayfun(@(x) num2str((x*par.s_step+par.s_0)/1000), new_tick_positions, 'UniformOutput', false);
+% Set the new tick positions and labels
+set(gca, 'XTick', new_tick_positions);
+set(gca, 'XTickLabel', new_tick_labels);
 %% 
 figure
 

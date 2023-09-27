@@ -69,7 +69,7 @@ function [par, g_nlp, args] = initialize_constraints(par, f, X, U, P, S)
              P(par.n_states+par.N + k);                        % front wind
              P(par.n_states+par.N+par.N + k);                  % side wind
              P(par.n_states+par.N+par.N+par.N + k);            % temperature
-             P(par.n_states+par.N+par.N+par.N+par.N+1: par.n_states+par.N+par.N+par.N+par.N+1+par.n_waves*3); % G
+             P(par.n_states+par.N+par.N+par.N+par.N+1: par.n_states+par.N+par.N+par.N+par.N+par.n_waves*3); % G
              ];     % 
             
         % Runge Kutta 4th order, compute x(k+1) = f(x_opt(k),u_opt(k),w(k))
@@ -97,7 +97,7 @@ function [par, g_nlp, args] = initialize_constraints(par, f, X, U, P, S)
     % constraint State of Charge target at end of Horizon N 
     % SoC_opt(k+N) - SoC_target(k+N) > 0, hard constraint
     % SoC_opt(k+N) - SoC_target(k+N) + S > 0, S >= 0, soft constraint
-    g.SoC_target = [X(2,par.N+1) - P(par.n_states+par.N+par.N+par.N+par.N+3 +1) + S];     
+    g.SoC_target = [X(2,par.N+1) - P(par.n_states+par.N+par.N+par.N+par.N+par.n_waves*3 +1) + S];     
     
     % compose final constraints vector
     g_nlp = [g_nlp; g.x0; g.st_next; g.SoC_target];

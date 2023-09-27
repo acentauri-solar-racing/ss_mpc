@@ -17,27 +17,25 @@
 %%
 function G_params = get_G(n_waves, G_data, t_0, t_f)
 
-    G_y = G_data(1+round(t_0/60):1+round(t_f/60));
+    G_y = G_data(1+round(t_0/60):1+round(t_f/60))';
     t_x = linspace(round(t_0/60),round(t_0/60)+length(G_y),length(G_y))';
     
-    tic
-    % Initialize parameters for each wave in a cell array
-    init_guess = cell(n_waves, 1);
     
     % Initialize parameters for all waves in a single vector
     init_guess = 1000*rand(1, 3 * n_waves); % [A1, B1, C1, A2, B2, C2, ...]
     
     % Create an options structure
-    options = optimoptions('lsqcurvefit', 'MaxFunctionEvaluations', 100000000);
+    options = optimoptions('lsqcurvefit', 'MaxFunctionEvaluations', 100000000, 'Algorithm','levenberg-marquardt');
+    lb = [];
+    ub = [];
     
     % Use lsqcurvefit to fit the model to your data
-    G_params = lsqcurvefit(@(params, x) flexibleModel(params, x, n_waves), init_guess, t_x, G_y);
+    G_params = lsqcurvefit(@(params, x) G_model(params, x, n_waves), init_guess, t_x, G_y,lb,ub,options);
     G_params = G_params';
-
 
 end
 
-function y = flexibleModel(params, x, n_waves)
+function y = G_model(params, x, n_waves)
     y = zeros(size(x));
 
     for i = 1:n_waves

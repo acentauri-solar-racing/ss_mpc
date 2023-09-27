@@ -18,7 +18,7 @@
 % "par": added mpc parameters
 
 %% General
-function par = get_mpc_param(par, s_0, t_0, s_step, N, s_tot, slack_weight)
+function par = get_mpc_param(par, s_0, t_0, s_step, N, s_tot, slack_weight, n_waves)
         %% Discretization variables
         par.s_step = s_step;                % [m]
         par.N = N;             % [-] Horizon length
@@ -56,7 +56,7 @@ function par = get_mpc_param(par, s_0, t_0, s_step, N, s_tot, slack_weight)
 %       par.G.t = linspace(0,60*(par.hour_end-par.hour_start),60*(par.hour_end-par.hour_start));        %vector time in MINUTES
 %       par.G_int = griddedInterpolant(par.G.t,par.G.rawdata);                                               %remember to convert seconds into minutes!
 
-        par.n_waves = 30;
+        par.n_waves = n_waves;
         %%
         % Temperature 2D spatial-time interpolation
         par.theta.rawdata = load("OnlineData\WeatherData.mat").temperature.tempMean(:,5:14); % from 8.30 to 17.30
