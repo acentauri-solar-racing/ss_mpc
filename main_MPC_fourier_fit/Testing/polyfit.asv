@@ -1,1 +1,0 @@
-load('..\OnlineData\WeatherIrradiance').irradiance.Gtotal(481:541);
