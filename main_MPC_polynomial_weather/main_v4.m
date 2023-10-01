@@ -7,6 +7,7 @@ import casadi.*
 
 warning('off');
 addpath('..\..\ss_offline_data\parameters');
+addpath('..\..\ss_offline_data\route');
 
 addpath("Functions_Scripts\");
 addpath("Functions_Scripts\load_function\");
@@ -20,7 +21,7 @@ addpath("OnlineData\");
 % common car parameters
 par = get_car_param();
 % (par struct, s_0, t_0, discretization step, horizon length, simulated distance, slack weight)
-par = get_mpc_param(par, 0, 0, 100, 50, 100000, 1e-3);
+par = get_mpc_param(par, 0, 0, 100, 10, 200000, 1e-3);
 
 %% Define variables for optimizer CasaDi
 [par, f, obj, X, U, P, S] = initialize_MPC(par);

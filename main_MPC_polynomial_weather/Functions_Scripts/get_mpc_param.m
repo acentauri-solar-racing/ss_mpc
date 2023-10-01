@@ -44,8 +44,8 @@ function par = get_mpc_param(par, s_0, t_0, s_step, N, s_tot, slack_weight)
         % To be changed with updated data
 
         % Loading Route Data
-        par.Route = load_route(par.s_step,par.s_final,par);
-        par.Route.max_v(par.Route.max_v < 51/3.6) = 61/3.6;         %initial values of max v are < 60km/h, which is the minimum velocity possible
+        par.Route = load_route(par.s_step);
+        par.Route.max_v(par.Route.max_v < 51/3.6) = 60/3.6;         %initial values of max v are < 60km/h, which is the minimum velocity possible
         % Loading Weather Data
         %%
         [par.timeline, par.cumdist, par.G_data, par.fW_data, par.sW_data, par.temp_data] = load_weather();
