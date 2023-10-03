@@ -1,0 +1,55 @@
+Total number of variables............................:      104
+                     variables with only lower bounds:        1
+                variables with lower and upper bounds:       82
+                     variables with only upper bounds:        0
+Total number of equality constraints.................:       63
+Total number of inequality constraints...............:       43
+        inequality constraints with only lower bounds:        1
+   inequality constraints with lower and upper bounds:       21
+        inequality constraints with only upper bounds:        0
+
+
+Number of Iterations....: 2000
+
+                                   (scaled)                 (unscaled)
+Objective...............:   3.5525432663341792e+02    3.5525432663341792e+02
+Dual infeasibility......:   1.2686671267522721e+07    1.2686671267522721e+07
+Constraint violation....:   2.3540338133870123e+05    2.3540338133870123e+05
+Variable bound violation:   5.0011354687740095e-05    5.0011354687740095e-05
+Complementarity.........:   9.3172822961297338e-10    9.3172822961297338e-10
+Overall NLP error.......:   1.2686671267522721e+07    1.2686671267522721e+07
+
+
+Number of objective function evaluations             = 3895
+Number of objective gradient evaluations             = 59
+Number of equality constraint evaluations            = 4482
+Number of inequality constraint evaluations          = 4482
+Number of equality constraint Jacobian evaluations   = 2048
+Number of inequality constraint Jacobian evaluations = 2048
+Number of Lagrangian Hessian evaluations             = 2000
+Total seconds in IPOPT                               = 4.082
+
+EXIT: Maximum Number of Iterations Exceeded.
+<a href="matlab: opentoline('C:\casadi-3.6.3-windows64-matlab2018b\+casadi\DM.m',960,1)">960 </a>        if self.swigPtr
+if system_dependent('IsDebugMode')==1, dbquit; end
+{Error using <a href="matlab:matlab.internal.language.introspective.errorDocCallback('casadi.Function/call')" style="font-weight:bold">casadi.Function/call</a>
+Error in Function::call for 'solver'
+[IpoptInterface] at
+.../casadi/core/function.cpp:1401:
+Error in Function::call for 'solver'
+[IpoptInterface] at
+.../casadi/core/function.cpp:330:
+KeyboardInterrupt
+
+Error in <a href="matlab:matlab.internal.language.introspective.errorDocCallback('casadi.Function/paren', 'C:\casadi-3.6.3-windows64-matlab2018b\+casadi\Function.m', 5366)" style="font-weight:bold">casadi.Function/paren</a> (<a href="matlab: opentoline('C:\casadi-3.6.3-windows64-matlab2018b\+casadi\Function.m',5366,0)">line 5366</a>)
+        res = self.call(arg);
+
+Error in <a href="matlab:matlab.internal.language.introspective.errorDocCallback('casadi.Function/subsref', 'C:\casadi-3.6.3-windows64-matlab2018b\+casadi\Function.m', 5351)" style="font-weight:bold">indexing</a> (<a href="matlab: opentoline('C:\casadi-3.6.3-windows64-matlab2018b\+casadi\Function.m',5351,0)">line 5351</a>)
+        [varargout{1:nargout}]= paren(self, s.subs{:});
+
+Error in <a href="matlab:matlab.internal.language.introspective.errorDocCallback('run_simulation_mpc', 'C:\Users\loito\Desktop\alphacentauri_shared\ss_mpc\main_MPC_v4_control_stop\Functions_Scripts\MPC\run_simulation_mpc.m', 146)" style="font-weight:bold">run_simulation_mpc</a> (<a href="matlab: opentoline('C:\Users\loito\Desktop\alphacentauri_shared\ss_mpc\main_MPC_v4_control_stop\Functions_Scripts\MPC\run_simulation_mpc.m',146,0)">line 146</a>)
+        sol = solver('x0', args.x0, 'lbx', args.lbx, 'ubx', args.ubx,...
+
+Error in <a href="matlab:matlab.internal.language.introspective.errorDocCallback('main_v4', 'C:\Users\loito\Desktop\alphacentauri_shared\ss_mpc\main_MPC_v4_control_stop\main_v4.m', 50)" style="font-weight:bold">main_v4</a> (<a href="matlab: opentoline('C:\Users\loito\Desktop\alphacentauri_shared\ss_mpc\main_MPC_v4_control_stop\main_v4.m',50,0)">line 50</a>)
+[par, OptRes] = run_simulation_mpc(par, args, f, solver, par.s_0, par.t_0);
+} 

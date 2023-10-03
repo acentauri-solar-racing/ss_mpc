@@ -1,0 +1,33 @@
+Total number of variables............................:      104
+                     variables with only lower bounds:        1
+                variables with lower and upper bounds:       82
+                     variables with only upper bounds:        0
+Total number of equality constraints.................:       63
+Total number of inequality constraints...............:       43
+        inequality constraints with only lower bounds:        1
+   inequality constraints with lower and upper bounds:       21
+        inequality constraints with only upper bounds:        0
+
+Restoration phase failed with unexpected solverreturn status 9
+
+Number of Iterations....: 4
+
+                                   (scaled)                 (unscaled)
+Objective...............:   1.4523047001207207e+01    8.4939719632652455e+01
+Dual infeasibility......:   7.9508714422213870e+01    4.6501590959625122e+02
+Constraint violation....:   9.3878111350029514e+23    9.3878111350029510e+31
+Variable bound violation:   0.0000000000000000e+00    0.0000000000000000e+00
+Complementarity.........:   1.5961629939412827e+07    9.3353438284760773e+07
+Overall NLP error.......:   9.3878111350029514e+23    9.3878111350029510e+31
+
+
+Number of objective function evaluations             = 7
+Number of objective gradient evaluations             = 6
+Number of equality constraint evaluations            = 9
+Number of inequality constraint evaluations          = 9
+Number of equality constraint Jacobian evaluations   = 6
+Number of inequality constraint Jacobian evaluations = 6
+Number of Lagrangian Hessian evaluations             = 4
+Total seconds in IPOPT                               = 0.016
+
+EXIT: Restoration Failed!
