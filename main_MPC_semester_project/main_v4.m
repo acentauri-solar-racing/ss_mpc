@@ -21,11 +21,11 @@ addpath("OfflineData\");
 addpath("OnlineData\");
 %% Set main parameters
 
-s_0 = 310000;        % initial position
-s_f = 330000;       % final position
+s_0 = 0;        % initial position
+s_f = 500;       % final position
 step = 100;         % simulation step
 
-t_0 = 60*60*3;            % initial time
+t_0 = 0;            % initial time
 N = 10;             % prediction horizon
 
 N_NLP = round((s_f-s_0)/step);
@@ -34,27 +34,41 @@ wS1 = 1e-3;         % slack 1 variable weight
 wS2 = 10;           % slack 2 variable weight
 
 run_mpc = 1;
-run_nlp = 1;
+run_nlp = 0;
 
-if run_mpc == 1;
+% initialize structs
+par = get_car_param();
+weather = struct;
+OptRes = struct;
+OptResNLP = struct;
+
+if run_mpc == 1
     %% Load parameters
-    
-    % common car parameters
-    par = get_car_param();
     % (par struct, s_0, t_0, discretization step, horizon length, simulated distance, slack weight)
     par = get_mpc_param(par, s_0, t_0, step, N, s_f-s_0, wS1, wS2);
-    
+
+    % add route parameters
+    par = load_route(par);
+
+    % add DP solution
+    par = load_DP(par, 'OfflineData\Full_Race_20230607_9h_30min.mat');
+
+    % add weather data
+    % weather = load_weather(weather, "C:\Users\loito\Desktop\alphacentauri_shared\ss_mpc\main_MPC_semester_project\OnlineData\20230926_090342_SF\preprocess");
+    weather = load_weather_benchmark(weather);
+
+
     %% Define variables for optimizer CasaDi
-    [par, f, obj, X, U, P, S1, S2] = initialize_MPC(par);
-    
+    [par, f, obj, X, U, P, S1, S2] = initialize_mpc(par);
+
     %% Initialize constraints
-    [par, g_nlp, args] = initialize_constraints(par, f, X, U, P, S1, S2);
+    [par, g_mpc, args] = initialize_constraints_mpc(par, f, X, U, P, S1, S2);
     
     %% Create solver
-    solver = initialize_solver(par, obj, g_nlp, X, U, P, S1, S2);
+    solver = initialize_solver_mpc(par, obj, g_mpc, X, U, P, S1, S2);
     
     %% Initialize Simulation
-    [par, OptRes] = run_simulation_mpc(par, args, f, solver, par.s_0, par.t_0);
+    [par, OptRes] = run_simulation_mpc(par, weather, args, f, solver, par.s_0, par.t_0);
     
     %% Diagnostics
     diagnostics = diagnostic(par.s_tot/par.s_step, OptRes.xdist);
@@ -63,32 +77,31 @@ end
 
 if run_nlp == 1
     %% NLP benchmark
-    par = get_car_param();
     par = get_mpc_param(par, s_0, t_0, step, N_NLP, s_f-s_0, wS1, wS2);
     
     [par, f, obj, X, U, P, S1, S2] = initialize_MPC(par);
     
-    [par, g_nlp, args] = initialize_constraints_NLP(par, f, X, U, P, S1, S2);
+    [par, g_nlp, args] = initialize_constraints_nlp(par, f, X, U, P, S1, S2);
     
-    solver = initialize_solver_NLP(par, obj, g_nlp, X, U, P, S1, S2);
+    solver = initialize_solver_nlp(par, obj, g_nlp, X, U, P, S1, S2);
     
     [par, OptResNLP] = run_simulation_nlp(par, args, solver, par.s_0, par.t_0, -1, -1);
 end
 
 %% Print final time, plot data
 
-if run_mpc == 1;
+if run_mpc == 1
     final_time_min = OptRes.xx(3,end)/60              % [min]      args.ubx(1:par.n_states:par.n_states*(par.N+1),1) = par.Route.max_v(par.iter_initial+par.iter_mpc+1:par.iter_initial+par.N+1+par.iter_mpc)*1.1;                     
     computational_time_MPC = OptRes.average_mpc_time*(s_f/step)
     vf_MPC = OptRes.xx(1,end)
     SoC_MPC = OptRes.xx(2,end)/par.E_bat_max
 end
 
-if run_nlp == 1;
+if run_nlp == 1
     final_time_NLP_min = OptResNLP.xx1(end,3)/60      % [min]  
     computational_time_NLP = OptResNLP.nlp_time
     vf_NLP = OptResNLP.xx1(end,1)
     SoC_NLP = OptResNLP.xx1(end,2)/par.E_bat_max
 end
 
-visualize_plot
+visualize_plot(par, OptRes, OptResNLP, run_mpc, run_nlp)

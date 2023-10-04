@@ -25,7 +25,7 @@
 % "S", symbolic initialization for slack variable (used for loosening SoC
 % target constraint),
 %%
-function [par, f, obj, X, U, P, S1, S2] = initialize_MPC(par)
+function [par, f, obj, X, U, P, S1, S2] = initialize_mpc(par)
     %% Symbolic setup of the problem
     % Import casADi package
     import casadi.*

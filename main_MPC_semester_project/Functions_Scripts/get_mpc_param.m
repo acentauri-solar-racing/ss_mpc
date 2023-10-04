@@ -12,7 +12,10 @@
 % "s_step": MPC discretization step
 % "N": horizon length
 % "s_tot": total simulated distance
-% "S1_weight": slack variable weight in the cost objective function
+% "S1_weight": slack variable weight in the cost objective function (SoC
+% target)
+% "S2_weight": slack variable weight in the cost objective function (max
+% velocity)
 
 % OUTPUT : 
 % "par": added mpc parameters
@@ -22,13 +25,13 @@ function par = get_mpc_param(par, s_0, t_0, s_step, N, s_tot, S1_weight, S2_weig
         %% Discretization variables
         par.s_step = s_step;                % [m]
         par.N = N;                      % [-] Horizon length
-        par.N_t = par.N*par.s_step/15   % [s] Horizon length in seconds
+        par.N_t = par.N*par.s_step/15;   % [s] Horizon length in seconds
         %par.N_t = 60*30;
 
         par.s_step_DP = 10000;          % [m] do not change
         
         par.s_0 = s_0;               % initial position of the simulation   
-        par.s_tot =  s_tot;             % [m] simulated distance from initial position
+        par.s_tot =  s_tot;             % [m] simulated distance from initial position to final position
         
         par.t_0 = t_0;              % [s], t_0 = 0 == 8.00, 0.5 == 8.30, 1 == 9.00
 
@@ -41,16 +44,6 @@ function par = get_mpc_param(par, s_0, t_0, s_step, N, s_tot, S1_weight, S2_weig
         %% Do not change
         par.s_final = 3000000;           % [m] total distance (for parameters)
         
-        %% Route and Weather 
-        % Interpolated Data 
-        % To be changed with updated data
-
-        % Loading Route Data
-        par.Route = load_route(par.s_step);
-        par.Route.max_v(par.Route.max_v < 51/3.6) = 60/3.6;         %initial values of max v are < 60km/h, which is the minimum velocity possible
-        % Loading Weather Data
-        %%
-        [par.timeline, par.G_nlp, par.G_mpc,  par.fW_nlp, par.fW_mpc, par.sW_nlp, par.sW_mpc, par.temp_nlp, par.temp_mpc] = load_weather_benchmark();
         %% DP Data 
         % Load battery target from DP
         % Should be adapted with new data

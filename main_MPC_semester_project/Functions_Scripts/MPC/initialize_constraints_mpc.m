@@ -43,7 +43,7 @@
 %          control input prediction, slack variable
 
 %%
-function [par, g_nlp, args] = initialize_constraints(par, f, X, U, P, S1, S2)
+function [par, g_nlp, args] = initialize_constraints_mpc(par, f, X, U, P, S1, S2)
     %% Define constraints vector
     % initialize constraint vector
     g_nlp = [];                                             

@@ -1,15 +1,24 @@
 %% Ngo Tony
 % This code was written with MATLAB R2022b. Errors may occur with other
-% versions, last updated: 06.09.2023
+% versions, last updated: 04.10.2023
 %% Description 
-% This function initializes all the variables needed for the mpc simulation
-% loop, run the actual simulation and stores the results 
+% This function initializes all the variables needed for the nlp simulation
+% run the actual simulation and stores the results 
 
 % INPUT: 
 % "par": parameters struct,
 % "args": argument struct needed for solver
-% "f": symbolic function of states dynamics used in function "shift"
 % "solver": solver to find optimal states and control inputs
+% "s_0": in [m]; initial position 
+% "t_0": in [s]; initial time (t = 0 should mean 08.00/start of the day)
+% "final_velocity_MPC":in [m/s]; boundary condition for final velocity, uses MPC
+% final value (to compare benchmark); use -1 if you wanna set an arbitrary
+% value ([0.75-1]*route_max_velocity)
+% "final_E_bat_MPC": in [J]; boundary condition for final battery energy, uses MPC
+% final value (to compare benchmark); use -1 if you wanna set an arbitrary
+% value (uses DP solution)
+
+
 
 % OUTPUT : 
 % "par": parameters struct, added new parameters
@@ -102,47 +111,30 @@ function [par, OptResNLP] = run_simulation_nlp(par, args, solver, s_0, t_0, fina
                            ];
     
     % initialize minimal/maximal velocity constraint
-    args.lbx(1:par.n_states:par.n_states*(par.N+1),1) = 10/3.6; %par.Route.min_v(par.iter_initial+1:par.iter_initial+par.N+1);
+    args.lbx(1:par.n_states:par.n_states*(par.N+1),1) = 55/3.6; %par.Route.min_v(par.iter_initial+1:par.iter_initial+par.N+1);
     args.ubx(1:par.n_states:par.n_states*(par.N+1),1) = par.Route.max_v(par.iter_initial+1:par.iter_initial+par.N+1);
     
-    %% Initialize Randbedingungen/Boundary condition
-    % get index of final velocity and final SoC
+    %% Initialize Randbedingungen
+    % state velocity
     v_idx = 1:par.n_states:par.n_states*(par.N+1);
+    args.lbx(v_idx(end),1) = final_velocity_MPC -0.001;                    
+    args.ubx(v_idx(end),1) = final_velocity_MPC +0.001;                     
+    
+    if final_velocity_MPC == -1
+        args.lbx(v_idx(end),1) = par.Route.max_v(par.iter_initial+par.N+1)*0.75;                    
+        args.ubx(v_idx(end),1) = par.Route.max_v(par.iter_initial+par.N+1); 
+    end
+
+    % state battery energy
     E_bat_idx = 2:par.n_states:par.n_states*(par.N+1);
 
-    %% Control Stop 1
-    par.CS1 = 320000;
-    par.CS1_idx = round(par.CS1/par.s_step);
-
-    if par.iter_initial < par.CS1_idx && par.CS1_idx < par.iter_initial + par.N
-        args.lbx(v_idx(par.CS1_idx-par.iter_initial),1) = 0.05;                    
-        args.ubx(v_idx(par.CS1_idx-par.iter_initial),1) = 0.06; 
-    end 
-    %% Control Stop 2
-    par.CS2 = 550000;
-    par.CS2_idx = round(par.CS2/par.s_step);
-
-    if par.iter_initial < par.CS2_idx && par.CS2_idx < par.iter_initial + par.N
-        args.lbx(v_idx(par.CS2_idx-par.iter_initial),1) = 0.050;                    
-        args.ubx(v_idx(par.CS2_idx-par.iter_initial),1) = 0.060; 
-    end
-    
-    %%
-    % set final condition
-    if final_velocity_MPC == -1
-        args.lbx(v_idx(end),1) = par.Route.max_v(par.iter_initial+par.N+1)*0.9;                    
-        args.ubx(v_idx(end),1) = par.Route.max_v(par.iter_initial+par.N+1)*0.9; 
-    else
-        args.lbx(v_idx(end),1) = final_velocity_MPC -0.0001;                    
-        args.ubx(v_idx(end),1) = final_velocity_MPC +0.0001;    
-    end
+    args.lbx(E_bat_idx(end),1) = final_E_bat_MPC -par.E_bat_max*0.00001;  
+    % args.ubx(E_bat_idx(end),1) = final_E_bat_MPC +par.E_bat_max*0.00001;  
 
     if final_E_bat_MPC == -1
-        args.lbx(E_bat_idx(end),1) = par.E_bat_target_DP(par.iter_initial+par.N+1)-par.E_bat_max*0.0001;                    
-        args.ubx(E_bat_idx(end),1) = par.E_bat_target_DP(par.iter_initial+par.N+1)+par.E_bat_max*0.0001;   
-    else
-        args.lbx(E_bat_idx(end),1) = final_E_bat_MPC -par.E_bat_max*0.00001;  
-        args.ubx(E_bat_idx(end),1) = final_E_bat_MPC +par.E_bat_max*0.00001; 
+        args.lbx(E_bat_idx(end),1) = par.E_bat_target_DP(1+par.iter_initial+par.N) -par.E_bat_max*0.00001;  
+        %args.ubx(E_bat_idx(end),1) = par.E_bat_target_DP(1+par.iter_initial+par.N) +par.E_bat_max*0.00001;  
+        args.ubx(E_bat_idx(end),1) = par.E_bat_max;  
     end
 
     % slack variable, they are 0 in the NLP
@@ -152,6 +144,7 @@ function [par, OptResNLP] = run_simulation_nlp(par, args, solver, s_0, t_0, fina
     args.ubx(par.n_states*(par.N+1)+par.n_controls*par.N +2,1) = 0; 
     %% Simulation Loop
     
+    % measure computational time
     main_loop = tic;
     
     % update actual position 

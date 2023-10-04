@@ -1,10 +1,11 @@
-function [t, G_nlp, G_mpc,  fW_nlp, fW_mpc, sW_nlp, sW_mpc, temp_nlp, temp_mpc] = load_weather_benchmark()
+function [weather] = load_weather_benchmark(weather)
 
 
     %% irradiance
     t = [0:1:16]; % 1 = 15 min : 1 = 15  min : 16 = 240 min = 4 h
+    weather.timeline = t;
     G_nlp = -2.1*t.^2+62*t+420;
-    G_nlp = G_nlp';
+    weather.G_nlp = G_nlp';
     G_mpc1 = -2.2*t(1:4).^2+70*t(1:4)+380;
     G_mpc1 = G_mpc1';
     G_mpc2 = -2*t(5:8).^2+58*t(5:8)+430;
@@ -13,7 +14,7 @@ function [t, G_nlp, G_mpc,  fW_nlp, fW_mpc, sW_nlp, sW_mpc, temp_nlp, temp_mpc] 
     G_mpc3 = G_mpc3';
     G_mpc4 = -2.05*t(13:17).^2+58*t(13:17)+450;
     G_mpc4 = G_mpc4';
-    G_mpc = [G_mpc1;G_mpc2;G_mpc3;G_mpc4];
+    weather.G_mpc = [G_mpc1;G_mpc2;G_mpc3;G_mpc4];
 
 
 
@@ -22,24 +23,24 @@ function [t, G_nlp, G_mpc,  fW_nlp, fW_mpc, sW_nlp, sW_mpc, temp_nlp, temp_mpc] 
     fW_nlp = -0.02*t.^2+0.04*t+2.2;  
     fW_nlp = -0.00*t.^2+0.00*t+0.0;
 
-    fW_nlp = fW_nlp';
+    weather.fW_nlp = fW_nlp';
     fW_mpc = -0*t.^0+0*t+0;
-    fW_mpc = fW_mpc';
+    weather.fW_mpc = fW_mpc';
 
     %% side wind
     
     sW_nlp = 0*t.^0+0*t+0;
-    sW_nlp = sW_nlp';
+    weather.sW_nlp = sW_nlp';
     sW_mpc = 0*t.^0+0*t+0;
-    sW_mpc = sW_mpc';
+    weather.sW_mpc = sW_mpc';
 
     %% temperature
     
     temp_nlp = 0.04*t.^2-0.06*t+25;
     temp_nlp = 0.0*t.^2-0.0*t+25;
-    temp_nlp = temp_nlp';
+    weather.temp_nlp = temp_nlp';
     temp_mpc = 0.02*t.^2-0.04*t+27;
-    temp_mpc = temp_mpc';
+    weather.temp_mpc = temp_mpc';
     
 
 %     if plot_weather == 1

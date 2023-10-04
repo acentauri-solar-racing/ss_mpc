@@ -102,7 +102,7 @@ function [par, OptResNLP] = run_simulation_nlp(par, args, solver, s_0, t_0, fina
                            ];
     
     % initialize minimal/maximal velocity constraint
-    args.lbx(1:par.n_states:par.n_states*(par.N+1),1) = 55/3.6; %par.Route.min_v(par.iter_initial+1:par.iter_initial+par.N+1);
+    args.lbx(1:par.n_states:par.n_states*(par.N+1),1) = 40/3.6; %par.Route.min_v(par.iter_initial+1:par.iter_initial+par.N+1);
     args.ubx(1:par.n_states:par.n_states*(par.N+1),1) = par.Route.max_v(par.iter_initial+1:par.iter_initial+par.N+1);
     
     %% Initialize Randbedingungen/Boundary condition
@@ -110,36 +110,36 @@ function [par, OptResNLP] = run_simulation_nlp(par, args, solver, s_0, t_0, fina
     v_idx = 1:par.n_states:par.n_states*(par.N+1);
     E_bat_idx = 2:par.n_states:par.n_states*(par.N+1);
 
-    %% Control Stop 1
-    par.CS1 = 320000;
-    par.CS1_idx = round(par.CS1/par.s_step);
-
-    if par.iter_initial < par.CS1_idx && par.CS1_idx < par.iter_initial + par.N
-        args.lbx(v_idx(par.CS1_idx-par.iter_initial),1) = 0.050;                    
-        args.ubx(v_idx(par.CS1_idx-par.iter_initial),1) = 0.060; 
-    end 
-    %% Control Stop 2
-    par.CS2 = 550000;
-    par.CS2_idx = round(par.CS2/par.s_step);
-
-    if par.iter_initial < par.CS2_idx && par.CS1_idx < par.iter_initial + par.N
-        args.lbx(v_idx(par.CS2_idx-par.iter_initial),1) = 0.050;                    
-        args.ubx(v_idx(par.CS2_idx-par.iter_initial),1) = 0.060; 
-    end
-    
-    %%
+%     %% Control Stop 1
+%     par.CS1 = 320000;
+%     par.CS1_idx = round(par.CS1/par.s_step);
+% 
+%     if par.iter_initial < par.CS1_idx && par.CS1_idx < par.iter_initial + par.N
+%         args.lbx(v_idx(par.CS1_idx-par.iter_initial),1) = 0.04;                    
+%         args.ubx(v_idx(par.CS1_idx-par.iter_initial),1) = 0.07; 
+%     end 
+%     %% Control Stop 2
+%     par.CS2 = 550000;
+%     par.CS2_idx = round(par.CS2/par.s_step);
+% 
+%     if par.iter_initial < par.CS2_idx && par.CS2_idx < par.iter_initial + par.N
+%         args.lbx(v_idx(par.CS2_idx-par.iter_initial),1) = 0.050;                    
+%         args.ubx(v_idx(par.CS2_idx-par.iter_initial),1) = 0.060; 
+%     end
+%     
+%     %%
     % set final condition
     if final_velocity_MPC == -1
-        args.lbx(v_idx(end),1) = par.Route.max_v(par.iter_initial+par.N+1)*0.9;                    
-        args.ubx(v_idx(end),1) = par.Route.max_v(par.iter_initial+par.N+1)*0.9; 
+        args.lbx(v_idx(end),1) = par.Route.max_v(par.iter_initial+par.N+1)*0.8;                    
+        args.ubx(v_idx(end),1) = par.Route.max_v(par.iter_initial+par.N+1); 
     else
         args.lbx(v_idx(end),1) = final_velocity_MPC -0.0001;                    
         args.ubx(v_idx(end),1) = final_velocity_MPC +0.0001;    
     end
 
     if final_E_bat_MPC == -1
-        args.lbx(E_bat_idx(end),1) = par.E_bat_target_DP(par.iter_initial+par.N+1);                    
-        args.ubx(E_bat_idx(end),1) = par.E_bat_target_DP(par.iter_initial+par.N+1);   
+        args.lbx(E_bat_idx(end),1) = par.E_bat_target_DP(par.iter_initial+par.N+1)-par.E_bat_max*0.01;                    
+        args.ubx(E_bat_idx(end),1) = par.E_bat_target_DP(par.iter_initial+par.N+1)+par.E_bat_max*0.01;   
     else
         args.lbx(E_bat_idx(end),1) = final_E_bat_MPC -par.E_bat_max*0.00001;  
         args.ubx(E_bat_idx(end),1) = final_E_bat_MPC +par.E_bat_max*0.00001; 

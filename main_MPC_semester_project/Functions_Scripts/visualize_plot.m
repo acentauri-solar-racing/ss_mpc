@@ -1,3 +1,4 @@
+function visual = visualize_plot(par, OptRes, OptResNLP, run_mpc, run_nlp)
 %% States and Weather
 if run_mpc == 1 && run_nlp  ~= 1
     figure
@@ -5,7 +6,7 @@ if run_mpc == 1 && run_nlp  ~= 1
     subplot(3,3,1)
     plot(OptRes.xx(1,:)*3.6), hold on
     plot(linspace(mean(OptRes.xx(1,:)*3.6),mean(OptRes.xx(1,:)*3.6),length(OptRes.xx(1,:))),'linewidth',1.)
-    plot(par.Route.max_v(1+par.iter_initial:par.iter_initial+size(OptRes.xx,2))*3.6)
+    plot(par.route.max_v(1+par.iter_initial:par.iter_initial+size(OptRes.xx,2))*3.6)
     
     title('velocity')
     legend('velocity', 'mean velocity', 'max velocity')
@@ -57,7 +58,7 @@ if run_mpc == 1 && run_nlp  ~= 1
     set(gca, 'XTickLabel', new_tick_labels);
     
     subplot(3,3,2)
-    plot(par.Route.incl(1+par.iter_initial:par.iter_initial+size(OptRes.xx,2)))
+    plot(par.route.incl(1+par.iter_initial:par.iter_initial+size(OptRes.xx,2)))
     title('Inclination')
     legend('\alpha')
     xlim([0 par.s_tot/par.s_step])
@@ -157,7 +158,7 @@ if run_mpc == 1 && run_nlp  ~= 1
     % subplot(3,1,1)
     % plot(OptRes.xx(1,:)*3.6,'k','LineWidth',1.), hold on
     % plot(linspace(mean(OptRes.xx(1,:)*3.6),mean(OptRes.xx(1,:)*3.6),length(OptRes.xx(1,:))),'linewidth',1.)
-    % plot(par.Route.max_v(1+par.iter_initial:par.iter_initial+size(OptRes.xx,2))*3.6)
+    % plot(par.route.max_v(1+par.iter_initial:par.iter_initial+size(OptRes.xx,2))*3.6)
     % plot(par.v_DP*3.6,'g','LineWidth',1)
     % title('velocity')
     % legend('velocity', 'mean velocity', 'max velocity','DP velocity')
@@ -249,7 +250,7 @@ if run_nlp == 1 && run_mpc == 1
     plot(OptResNLP.xx1(:,1)*3.6, 'LineStyle','--','linewidth',1.), hold on
     plot(OptRes.xx(1,:)*3.6','linewidth',1.), hold on
     
-    plot(par.Route.max_v(1+par.iter_initial:par.iter_initial+size(OptRes.xx,2))*3.6,'-.', 'LineWidth', 0.5, 'Color', 'k')
+    plot(par.route.max_v(1+par.iter_initial:par.iter_initial+size(OptRes.xx,2))*3.6,'-.', 'LineWidth', 0.5, 'Color', 'k')
     
     title('velocity')
     legend('nlp', 'mpc', 'max velocity')
@@ -310,7 +311,7 @@ if run_nlp == 1 && run_mpc ~= 1
     subplot(3,1,1)
     plot(OptResNLP.xx1(:,1)*3.6, 'LineStyle','--','linewidth',1.), hold on
     
-    plot(par.Route.max_v(1+par.iter_initial:par.iter_initial+size(OptResNLP.xx,2))*3.6,'-.', 'LineWidth', 0.5, 'Color', 'k')
+    plot(par.route.max_v(1+par.iter_initial:par.iter_initial+size(OptResNLP.xx,2))*3.6,'-.', 'LineWidth', 0.5, 'Color', 'k')
     
     title('velocity')
     legend('nlp', 'max velocity')
@@ -358,4 +359,5 @@ if run_nlp == 1 && run_mpc ~= 1
     % Set the new tick positions and labels
     set(gca, 'XTick', new_tick_positions);
     set(gca, 'XTickLabel', new_tick_labels);
+end
 end

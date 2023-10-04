@@ -1,6 +1,6 @@
 %% Ngo Tony
 % This code was written with MATLAB R2022b. Errors may occur with other
-% versions, last updated: 06.09.2023
+% versions, last updated: 04.10.2023
 %% Description 
 % This function creates the optimizer solver used in the simulation loop;
 % the solver is IPOPT
@@ -23,7 +23,7 @@
 
 %
 %%
-function solver = initialize_solver_NLP(par, obj, g_nlp, X, U, P, S1, S2)
+function solver = initialize_solver_nlp(par, obj, g_nlp, X, U, P, S1, S2)
     %import casadi.* package
     import casadi.*
     

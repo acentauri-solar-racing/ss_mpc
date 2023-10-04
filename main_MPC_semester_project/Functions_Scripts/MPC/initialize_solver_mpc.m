@@ -14,7 +14,7 @@
 % "P": symbolic initialization of parameters (v0, E_bat0, t0, road inclination,
 % irradiation, front wind velocity, side wind velocity, ambient
 % temperature, E_bat_target),
-% "S": symbolic initialization for slack variable (used for loosening SoC
+% "S1", "S2": symbolic initialization for slack variable (used for loosening SoC
 % target constraint),
 
 % OUTPUT : 
@@ -23,7 +23,7 @@
 
 %
 %%
-function solver = initialize_solver(par, obj, g_nlp, X, U, P, S1, S2)
+function solver = initialize_solver_mpc(par, obj, g_nlp, X, U, P, S1, S2)
     %import casadi.* package
     import casadi.*
     

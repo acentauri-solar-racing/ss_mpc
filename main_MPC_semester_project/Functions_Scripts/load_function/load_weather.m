@@ -1,8 +1,25 @@
+%% Ngo Tony
+% This code was written with MATLAB R2022b. Errors may occur with other
+% versions, last updated: 04.10.2023
+%% Description 
+% This function loads weatherdata from a certain folder
+% INPUT : 
+% "weatherfolderpath": string, folder path that contains the csv weather
+% data
+
+% OUTPUT : 
+% "timeline (time)": vector that contains the time column resolution of the data
+% "cumdist (space)": vector that contains the time cumulative distance resolution of the data
+% "G_data": Global irradiance data (matrix dimension "time"x"space")
+% "fW_data": Front Wind data (matrix dimension "time"x"space")
+% "sW_data": Side Wind data (matrix dimension "time"x"space")
+% "temp_data": Temperature data (matrix dimension "time"x"space")
 
 %% Import data from text file
 
 
-function [time, cumdist, G_data, fW_data, sW_data, temp_data] = load_weather()
+function [weather] = load_weather(weather, weatherfolderpath)
+    % create weather struct
     %% Set up the Import Options and import the data
     opts = delimitedTextImportOptions("NumVariables", 11);
     
@@ -24,21 +41,25 @@ function [time, cumdist, G_data, fW_data, sW_data, temp_data] = load_weather()
     % opts = setvaropts(opts, "time", "EmptyFieldRule", "auto");
     
     % Import the data
-    G_table = readtable("C:\Users\loito\Desktop\alphacentauri_shared\ss_mpc\main_MPC_v3_polynomial_weather\OnlineData\20230926_090342_SF\preprocess\globalIrradiance.csv", opts);
-    fW_table = readtable("C:\Users\loito\Desktop\alphacentauri_shared\ss_mpc\main_MPC_v3_polynomial_weather\OnlineData\20230926_090342_SF\preprocess\frontWind.csv", opts);
-    sW_table = readtable("C:\Users\loito\Desktop\alphacentauri_shared\ss_mpc\main_MPC_v3_polynomial_weather\OnlineData\20230926_090342_SF\preprocess\sideWind.csv", opts);
-    temp_table = readtable("C:\Users\loito\Desktop\alphacentauri_shared\ss_mpc\main_MPC_v3_polynomial_weather\OnlineData\20230926_090342_SF\preprocess\temperature.csv", opts);
-%         G_table = readtable("G:\Shared drives\AlphaCentauri\SolarCar_22 23\6. Strategy & Simulation\ss_online_data\20231001_155728_SF\preprocess\globalIrradiance.csv", opts);
+    G_table = readtable(weatherfolderpath +"globalIrradiance.csv", opts);
+    fW_table = readtable(weatherfolderpath + "frontWind.csv", opts);
+    sW_table = readtable(weatherfolderpath + "sideWind.csv", opts);
+    temp_table = readtable(weatherfolderpath + "temperature.csv", opts);
+  
+%   temp_table = readtable("C:\Users\loito\Desktop\alphacentauri_shared\ss_mpc\main_MPC_v3_polynomial_weather\OnlineData\20230926_090342_SF\preprocess\temperature.csv", opts);
+
+%     G_table = readtable("G:\Shared drives\AlphaCentauri\SolarCar_22 23\6. Strategy & Simulation\ss_online_data\20231001_155728_SF\preprocess\globalIrradiance.csv", opts);
 %     fW_table = readtable("G:\Shared drives\AlphaCentauri\SolarCar_22 23\6. Strategy & Simulation\ss_online_data\20231001_155728_SF\preprocess\frontWind.csv", opts);
 %     sW_table = readtable("G:\Shared drives\AlphaCentauri\SolarCar_22 23\6. Strategy & Simulation\ss_online_data\20231001_155728_SF\preprocess\sideWind.csv", opts);
 %     temp_table = readtable("G:\Shared drives\AlphaCentauri\SolarCar_22 23\6. Strategy & Simulation\ss_online_data\20231001_155728_SF\preprocess\temperature.csv", opts);
-    time = cell2mat(table2array(G_table(2:end,1)));
-    cumdist = table2array(G_table(1,2:end));
     
-    G_data =  cellfun(@str2num,table2array(G_table(2:end, 2:end)));
-    fW_data = cellfun(@str2num,table2array(fW_table(2:end, 2:end)));
-    sW_data = cellfun(@str2num,table2array(sW_table(2:end, 2:end)));
-    temp_data = cellfun(@str2num,table2array(temp_table(2:end, 2:end)));
+    weather.timeline = cell2mat(table2array(G_table(2:end,1)));
+    weather.cumdist = table2array(G_table(1,2:end));
+    
+    weather.G_data =  cellfun(@str2num,table2array(G_table(2:end, 2:end)));
+    weather.fW_data = cellfun(@str2num,table2array(fW_table(2:end, 2:end)));
+    weather.sW_data = cellfun(@str2num,table2array(sW_table(2:end, 2:end)));
+    weather.temp_data = cellfun(@str2num,table2array(temp_table(2:end, 2:end)));
     
     
     %% Clear temporary variables

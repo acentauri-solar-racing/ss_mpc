@@ -20,15 +20,15 @@
 
 % "OptRes.xS1": slack variable at every step 
 
-% "OptRes.xG": irradiation at every step
-% "OptRes.xwind_front": front wind at every step
-% "OptRes.xwind_side": side wind at every step
-% "OptRes.xtheta": ambient temperature at every step
-% "OptRes.xSoC_N": Battery energy at horizon N, at every step
-% "OptRes.xSoC_diff": Difference between Battery Energy(k+N) and Battery Energy target(k+N)
-% "OptRes.xdist": distance vector
+% "OptRes.xG(r)": irradiation at every step predicted by the controller (r instead is the "real" update) 
+% "OptRes.xwind_front(r)": front wind at every step
+% "OptRes.xwind_side(r)": side wind at every step
+% "OptRes.xtheta(r)": ambient temperature at every step
+% "OptRes.xSoC_N(r)": Battery energy at horizon N, at every step
+% "OptRes.xSoC_diff(r)": Difference between Battery Energy(k+N) and Battery Energy target(k+N)
+% "OptRes.xdist(r)": distance vector
 
-function [par, OptRes] = run_simulation_mpc(par, args, f, solver, s_0, t_0)
+function [par, OptRes] = run_simulation_mpc(par, weather, args, f, solver, s_0, t_0)
     % Start MPC
     
     % overall iteration position, s = 0 => iter_initial = 0
@@ -41,7 +41,7 @@ function [par, OptRes] = run_simulation_mpc(par, args, f, solver, s_0, t_0)
     par.iter_mpc_max = par.s_tot/par.s_step;
     
     % initial velocity
-    v_0 = par.Route.max_v(par.iter_initial+par.iter_mpc+1)*0.95;
+    v_0 = par.route.max_v(par.iter_initial+par.iter_mpc+1)*0.95;
     
     % initial state of charge (value took from SoC target)
     SoC_0 = par.E_bat_target_DP(1+par.iter_initial);
@@ -76,24 +76,24 @@ function [par, OptRes] = run_simulation_mpc(par, args, f, solver, s_0, t_0)
     %% Initialize Weather Data
     
     % initialize road inclination vector
-    simvar.alpha = par.Route.incl';                                   
+    par.route.incl = par.route.incl';                                   
     
     % initialize battery energy target vector
     SoC_target = par.E_bat_target_DP;
     
     % initialize polynomial fit of G, fW
-    [par.G_1, par.G_2, par.G_3] = get_poly(par.G_nlp, 0, 60*15*4*4);
-    [par.fW_1, par.fW_2, par.fW_3] = get_poly(par.fW_nlp, 0, 60*15*4*4);
-    [par.sW_1, par.sW_2, par.sW_3] = get_poly(par.sW_nlp, 0, 60*15*4*4);
-    [par.temp_1, par.temp_2, par.temp_3] = get_poly(par.temp_nlp, 0, 60*15*4*4);
+    [par.G_1, par.G_2, par.G_3] = get_poly(weather.G_nlp, 0, 60*15*4*4);
+    [par.fW_1, par.fW_2, par.fW_3] = get_poly(weather.fW_nlp, 0, 60*15*4*4);
+    [par.sW_1, par.sW_2, par.sW_3] = get_poly(weather.sW_nlp, 0, 60*15*4*4);
+    [par.temp_1, par.temp_2, par.temp_3] = get_poly(weather.temp_nlp, 0, 60*15*4*4);
 
-    [par.G_1r, par.G_2r, par.G_3r] = get_poly(par.G_nlp, 0, 60*15*4*4);
-    [par.fW_1r, par.fW_2r, par.fW_3r] = get_poly(par.fW_nlp, 0, 60*15*4*4);
-    [par.sW_1r, par.sW_2r, par.sW_3r] = get_poly(par.sW_nlp, 0, 60*15*4*4);
-    [par.temp_1r, par.temp_2r, par.temp_3r] = get_poly(par.temp_nlp, 0, 60*15*4*4);
+    [par.G_1r, par.G_2r, par.G_3r] = get_poly(weather.G_nlp, 0, 60*15*4*4);
+    [par.fW_1r, par.fW_2r, par.fW_3r] = get_poly(weather.fW_nlp, 0, 60*15*4*4);
+    [par.sW_1r, par.sW_2r, par.sW_3r] = get_poly(weather.sW_nlp, 0, 60*15*4*4);
+    [par.temp_1r, par.temp_2r, par.temp_3r] = get_poly(weather.temp_nlp, 0, 60*15*4*4);
 
     % initialize parameters/prediction (warm start)
-    vars_update_pred = [simvar.alpha(par.iter_initial+par.iter_mpc+1:par.iter_initial+par.iter_mpc+1+(par.N-1)); 
+    vars_update_pred = [par.route.incl(par.iter_initial+par.iter_mpc+1:par.iter_initial+par.iter_mpc+1+(par.N-1)); 
                            par.G_1;
                            par.G_2;
                            par.G_3;
@@ -109,9 +109,9 @@ function [par, OptRes] = run_simulation_mpc(par, args, f, solver, s_0, t_0)
                            ];
     
     % initialize minimal/maximal velocity constraint
-    args.lbx(1:par.n_states:par.n_states*(par.N+1),1) = 55/3.6; %par.Route.min_v(par.iter_initial+par.iter_mpc+1:par.iter_initial+par.N+1+par.iter_mpc);
-    args.ubg(par.n_states*(par.N+1)+2:par.n_states*(par.N+1)+1+par.N+1) = par.Route.max_v(par.iter_initial+par.iter_mpc+1:par.iter_initial+par.N+1+par.iter_mpc);
-    args.ubx(1:par.n_states:par.n_states*(par.N+1),1) = par.Route.max_v(par.iter_initial+par.iter_mpc+1:par.iter_initial+par.N+1+par.iter_mpc)+10;                     
+    args.lbx(1:par.n_states:par.n_states*(par.N+1),1) = 55/3.6; %par.route.min_v(par.iter_initial+par.iter_mpc+1:par.iter_initial+par.N+1+par.iter_mpc);
+    args.ubg(par.n_states*(par.N+1)+2:par.n_states*(par.N+1)+1+par.N+1) = par.route.max_v(par.iter_initial+par.iter_mpc+1:par.iter_initial+par.N+1+par.iter_mpc);
+    args.ubx(1:par.n_states:par.n_states*(par.N+1),1) = par.route.max_v(par.iter_initial+par.iter_mpc+1:par.iter_initial+par.N+1+par.iter_mpc)+10;                     
 
     %% Simulation Loop
     
@@ -168,7 +168,7 @@ function [par, OptRes] = run_simulation_mpc(par, args, f, solver, s_0, t_0)
         OptRes.xSoC_diff(par.iter_mpc+1) = OptRes.xx1(end,2,par.iter_mpc+1) - SoC_target(par.iter_initial+par.N+par.iter_mpc);
     
         % advance simulation, update real plant
-        [s_0, x0, u0] = shift(par.s_step, s_0, x0, u, f, [simvar.alpha(par.iter_initial+par.iter_mpc+1); ...
+        [s_0, x0, u0] = shift(par.s_step, s_0, x0, u, f, [par.route.incl(par.iter_initial+par.iter_mpc+1); ...
                                                            par.G_1r;
                                                            par.G_2r;
                                                            par.G_3r;
@@ -184,7 +184,7 @@ function [par, OptRes] = run_simulation_mpc(par, args, f, solver, s_0, t_0)
     
 
         % update the weather/road variables
-        vars_update_pred = [simvar.alpha(par.iter_initial+par.iter_mpc+1 +1:par.iter_initial+par.iter_mpc+1+(par.N-1) +1); 
+        vars_update_pred = [par.route.incl(par.iter_initial+par.iter_mpc+1 +1:par.iter_initial+par.iter_mpc+1+(par.N-1) +1); 
                             par.G_1;
                             par.G_2;
                             par.G_3;
@@ -199,8 +199,8 @@ function [par, OptRes] = run_simulation_mpc(par, args, f, solver, s_0, t_0)
                             par.temp_3];     
     
         % update the maximal velocity constraint
-        args.ubg(par.n_states*(par.N+1)+2:par.n_states*(par.N+1)+1+par.N+1) = par.Route.max_v(par.iter_initial+par.iter_mpc+1:par.iter_initial+par.N+1+par.iter_mpc);
-        args.ubx(1:par.n_states:par.n_states*(par.N+1),1) = par.Route.max_v(par.iter_initial+par.iter_mpc+1:par.iter_initial+par.N+1+par.iter_mpc)+10;                     
+        args.ubg(par.n_states*(par.N+1)+2:par.n_states*(par.N+1)+1+par.N+1) = par.route.max_v(par.iter_initial+par.iter_mpc+1:par.iter_initial+par.N+1+par.iter_mpc);
+        args.ubx(1:par.n_states:par.n_states*(par.N+1),1) = par.route.max_v(par.iter_initial+par.iter_mpc+1:par.iter_initial+par.N+1+par.iter_mpc)+10;                     
 
     
         % store real state values

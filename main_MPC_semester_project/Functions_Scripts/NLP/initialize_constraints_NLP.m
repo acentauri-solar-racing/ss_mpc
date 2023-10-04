@@ -1,6 +1,6 @@
 %% Ngo Tony
 % This code was written with MATLAB R2022b. Errors may occur with other
-% versions, last updated: 06.09.2023
+% versions, last updated: 04.10.2023
 %% Description 
 % This function initializes the constraints used in the MPC.
 % It first defines the symbolic constraint functions in the vector "g_nlp"
@@ -19,7 +19,7 @@
 % "P": symbolic initialization of parameters (v0, E_bat0, t0, road inclination,
 % irradiation, front wind velocity, side wind velocity, ambient
 % temperature, E_bat_target),
-% "S": symbolic initialization for slack variable (used for loosening SoC
+% "S1", "S2": symbolic initialization for slack variable (used for loosening SoC
 % target constraint),
 
 % OUTPUT : 
@@ -43,7 +43,7 @@
 %          control input prediction, slack variable
 
 %%
-function [par, g_nlp, args] = initialize_constraints_NLP(par, f, X, U, P, S1, S2)
+function [par, g_nlp, args] = initialize_constraints_nlp(par, f, X, U, P, S1, S2)
     %% Define constraints vector
     % initialize constraint vector
     g_nlp = [];                                             
