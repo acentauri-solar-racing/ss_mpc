@@ -2,7 +2,7 @@
 % This code was written with MATLAB R2022b. Errors may occur with other
 % versions, last updated: 04.10.2023
 %% Description 
-% This function initializes the constraints used in the MPC.
+% This function initializes the constraints used in the nlp.
 % It first defines the symbolic constraint functions in the vector "g_nlp"
 % and set later the lower/upper boundaries in the "args" struct, of both
 % constraints and state/control variables
@@ -28,11 +28,7 @@
 %          "g,x0": constraint that enforces initial conditions,
 %          "g.st_next": constraints of multiple shooting, where it is
 %          enforced x(k+1) = f(x(k),u(k),w(k))
-%          N.B. x(k), k in [1, N+1] are optimization variables (lifting)
-%          "g.SoC_target": constraint that enforces the predicted SoC to be
-%          greater or equal to the target SoC AT THE END of the prediction
-%          horizon N; S is slack variable, S != 0 means that the constraint
-%          is softened
+
 % "args": struct used in optimizer, variable that can be updated during
 %         simulation,
 %         "args.lbg": contains lower bounds for constraints vector "g_nlp"
@@ -101,19 +97,10 @@ function [par, g_nlp, args] = initialize_constraints_nlp(par, f, X, U, P, S1, S2
         % equal to x_opt(k+1) - x_opt(k) + dt/6 * (k1 +2*k2 +2*k3 +k4) == 0
         g.st_next = [g.st_next; st_next-st_next_RK4];                        
     end
-    
-    % constraint State of Charge target at end of Horizon N 
-    % SoC_opt(k+N) - SoC_target(k+N) > 0, hard constraint
-    % SoC_opt(k+N) - SoC_target(k+N) + S > 0, S >= 0, soft constraint
-    g.SoC_target = [X(2,par.N+1) - P(par.n_states + par.N + 12 +1) + S1];     
-    
-    g.max_v = [];
-    for k = 1:par.N+1
-        g.max_v = [g.max_v; X(1,k) - S2];
-    end
+
 
     % compose final constraints vector
-    g_nlp = [g_nlp; g.x0; g.st_next; g.SoC_target; g.max_v];
+    g_nlp = [g_nlp; g.x0; g.st_next];
   
     %% Set boundary constraints to constraints vector
     % initialize "args" struct, to be used in the solver
@@ -125,15 +112,6 @@ function [par, g_nlp, args] = initialize_constraints_nlp(par, f, X, U, P, S1, S2
     % x_opt(k+1) - x_opt(k) + dt/6 * (k1 +2*k2 +2*k3 +k4) == 0
     args.lbg(1:par.n_states*(par.N+1)) = 0;                                                 
     args.ubg(1:par.n_states*(par.N+1)) = 0;  
-
-    %SoC has to be greater or equal than SoC target at the end of Horizon
-    % SoC(k+N) > SoC_target(k+N) -> in the NLP is not needed
-    args.lbg(par.n_states*(par.N+1)+1) =   -inf;      
-    args.ubg(par.n_states*(par.N+1)+1) =   inf;
-    
-    % soft constraint for max velocity -> in the NLP is not needed
-    args.lbg(par.n_states*(par.N+1)+2:par.n_states*(par.N+1)+1+par.N+1) = -inf;                                                 
-    args.ubg(par.n_states*(par.N+1)+2:par.n_states*(par.N+1)+1+par.N+1) = inf;  
     
     %% initialize boundary constraints to optimization variables vector
 
@@ -157,12 +135,12 @@ function [par, g_nlp, args] = initialize_constraints_nlp(par, f, X, U, P, S1, S2
     args.lbx(par.n_states*(par.N+1)+2:par.n_controls:par.n_states*(par.N+1)+par.n_controls*par.N,1) = -5000;
     args.ubx(par.n_states*(par.N+1)+2:par.n_controls:par.n_states*(par.N+1)+par.n_controls*par.N,1) = 0; 
     
-    % slack variable S1, > 0
+    % slack variable S1, > 0, not used in the nlp
     args.lbx(par.n_states*(par.N+1)+par.n_controls*par.N +1,1) = 0; 
-    args.ubx(par.n_states*(par.N+1)+par.n_controls*par.N +1,1) = inf; 
+    args.ubx(par.n_states*(par.N+1)+par.n_controls*par.N +1,1) = 0; 
     
     % S2
     args.lbx(par.n_states*(par.N+1)+par.n_controls*par.N +2,1) = 0; 
-    args.ubx(par.n_states*(par.N+1)+par.n_controls*par.N +2,1) = inf; 
+    args.ubx(par.n_states*(par.N+1)+par.n_controls*par.N +2,1) = 0; 
 
 end

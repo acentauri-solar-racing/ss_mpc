@@ -6,17 +6,17 @@
 % next dynamics
 
 % INPUT: 
-% "s_step": discretization step
-% "s_0": position at the moment before the shift
-% "x0": initial conditions before the shift
-% "u": control input
-% "f": function of state dynamics
-% "vars": varying condition (road inclination, irradiation, front wind,
-% side wind, amb. temperature)
+% "s_step" (int): discretization step
+% "s_0" (int): position at the moment before the shift
+% "x0" (int, "[#state"x1]): initial conditions before the shift
+% "u"(int, "[#control"x1]): control input
+% "f" (function): function of state dynamics
+% "vars" (int, [N+12x1]): varying condition (road inclination prediction (N), irradiation, front wind,
+% side wind, amb. temperature polynomials (12))
 % OUTPUT : 
-% "s_0": new position after shift
-% "x0": new initial conditions after shift
-% "u0": input prediction after shift
+% "s_0" (int): new position after shift
+% "x0" (int, "[#state"x1]): new initial conditions after shift
+% "u0"(int, "[#control"x1]): input prediction after shift
 
 %
 %%
@@ -36,5 +36,5 @@ function [s_0, x0, u0] = shift(s_step, s_0, x0, u, f, vars)
     
     x0 = full(st);                              % update x0 with new state
     s_0 = s_0 + s_step;                                % update distance s_0 with new state
-    u0 = [u(2:size(u,1),:);u(size(u,1),:)];         
+    u0 = [u(2:size(u,1),:); u(size(u,1),:)];         
 end

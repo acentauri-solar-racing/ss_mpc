@@ -1,28 +1,14 @@
-clear all
-close all
-clc
-
-%% Define model and functions
-import casadi.*
-
-warning('off');
-addpath('..\..\ss_offline_data\route\BWSC');
-
-addpath('..\..\ss_offline_data\parameters');
-addpath('..\..\ss_offline_data\route');
-
-addpath("Functions_Scripts\");
-addpath("Functions_Scripts\Model");
-addpath("Functions_Scripts\load_function");
-addpath("Functions_Scripts\MPC");
-addpath("Functions_Scripts\NLP");
-
-addpath("OfflineData\");
-addpath("OnlineData\");
+% 0. setup
+% 1. load parameters
+% 2. initialize_mpc/nlp
+% 3. initialize_constraints
+% 4. initialize_solver
+% 2. run_simulation
+setup
 %% Set main parameters
 
-s_0 = 0;        % initial position
-s_f = 500;       % final position
+s_0 = 710000;        % initial position
+s_f = 760000;       % final position
 step = 100;         % simulation step
 
 t_0 = 0;            % initial time
@@ -33,8 +19,9 @@ N_NLP = round((s_f-s_0)/step);
 wS1 = 1e-3;         % slack 1 variable weight
 wS2 = 10;           % slack 2 variable weight
 
+% 1 run, ~= 1 not run
 run_mpc = 1;
-run_nlp = 0;
+run_nlp = 1;
 
 % initialize structs
 par = get_car_param();
@@ -46,13 +33,10 @@ if run_mpc == 1
     %% Load parameters
     % (par struct, s_0, t_0, discretization step, horizon length, simulated distance, slack weight)
     par = get_mpc_param(par, s_0, t_0, step, N, s_f-s_0, wS1, wS2);
-
     % add route parameters
     par = load_route(par);
-
     % add DP solution
     par = load_DP(par, 'OfflineData\Full_Race_20230607_9h_30min.mat');
-
     % add weather data
     % weather = load_weather(weather, "C:\Users\loito\Desktop\alphacentauri_shared\ss_mpc\main_MPC_semester_project\OnlineData\20230926_090342_SF\preprocess");
     weather = load_weather_benchmark(weather);
@@ -77,15 +61,16 @@ end
 
 if run_nlp == 1
     %% NLP benchmark
-    par = get_mpc_param(par, s_0, t_0, step, N_NLP, s_f-s_0, wS1, wS2);
-    
-    [par, f, obj, X, U, P, S1, S2] = initialize_MPC(par);
-    
+    par = get_nlp_param(par, s_0, t_0, step, N_NLP, s_f-s_0, wS1, wS2);
+    par = load_route(par);
+    par = load_DP(par, 'OfflineData\Full_Race_20230607_9h_30min.mat');
+    % weather = load_weather(weather, "C:\Users\loito\Desktop\alphacentauri_shared\ss_mpc\main_MPC_semester_project\OnlineData\20230926_090342_SF\preprocess");
+    weather = load_weather_benchmark(weather);
+
+    [par, f, obj, X, U, P, S1, S2] = initialize_nlp(par);
     [par, g_nlp, args] = initialize_constraints_nlp(par, f, X, U, P, S1, S2);
-    
     solver = initialize_solver_nlp(par, obj, g_nlp, X, U, P, S1, S2);
-    
-    [par, OptResNLP] = run_simulation_nlp(par, args, solver, par.s_0, par.t_0, -1, -1);
+    [par, OptResNLP] = run_simulation_nlp(par, weather, args, solver, par.s_0, par.t_0, -1, -1);
 end
 
 %% Print final time, plot data

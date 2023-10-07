@@ -18,8 +18,6 @@
 % final value (to compare benchmark); use -1 if you wanna set an arbitrary
 % value (uses DP solution)
 
-
-
 % OUTPUT : 
 % "par": parameters struct, added new parameters
 % "OptResNLP": Optimization results
@@ -37,17 +35,14 @@
 % "OptResNLP.xSoC_diff": Difference between Battery Energy(k+N) and Battery Energy target(k+N)
 % "OptResNLP.xdist": distance vector
 
-function [par, OptResNLP] = run_simulation_nlp(par, args, solver, s_0, t_0, final_velocity_MPC, final_E_bat_MPC)
-    % Start MPC
-    %% NLP optimization over entire horizon
-
-
+function [par, OptResNLP] = run_simulation_nlp(par, weather, args, solver, s_0, t_0, final_velocity_MPC, final_E_bat_MPC)
+%% NLP optimization over entire horizon
     %% Initial conditions
     % overall iteration position, s = 0 => iter_initial = 0
     par.iter_initial = round(s_0/par.s_step);
     
     % initial velocity
-    v_0 = par.Route.max_v(par.iter_initial+1)*0.95;
+    v_0 = par.route.max_v(par.iter_initial+1)*0.95;
     
     % initial state of charge (value took from SoC target)
     SoC_0 = par.E_bat_target_DP(1+par.iter_initial);
@@ -83,19 +78,19 @@ function [par, OptResNLP] = run_simulation_nlp(par, args, solver, s_0, t_0, fina
     %% Initialize Weather Data
     
     % initialize road inclination vector
-    simvar.alpha = par.Route.incl';                                   
+    par.route.incl = par.route.incl';                                   
     
     % initialize battery energy target vector
     SoC_target = par.E_bat_target_DP;
     
     % initialize polynomial fit of G, fW
-    [par.G_1, par.G_2, par.G_3] = get_poly(par.G_nlp, 0, 60*15*4*4);
-    [par.fW_1, par.fW_2, par.fW_3] = get_poly(par.fW_nlp, 0, 60*15*4*4);
-    [par.sW_1, par.sW_2, par.sW_3] = get_poly(par.sW_nlp, 0, 60*15*4*4);
-    [par.temp_1, par.temp_2, par.temp_3] = get_poly(par.temp_nlp, 0, 60*15*4*4);
+    [par.G_1, par.G_2, par.G_3] = get_poly(weather.G_nlp, 0, 60*15*4*4);
+    [par.fW_1, par.fW_2, par.fW_3] = get_poly(weather.fW_nlp, 0, 60*15*4*4);
+    [par.sW_1, par.sW_2, par.sW_3] = get_poly(weather.sW_nlp, 0, 60*15*4*4);
+    [par.temp_1, par.temp_2, par.temp_3] = get_poly(weather.temp_nlp, 0, 60*15*4*4);
 
     % initialize parameters/prediction (warm start)
-    vars_update_pred = [simvar.alpha(par.iter_initial+1:par.iter_initial+1+(par.N-1)); 
+    vars_update_pred = [par.route.incl(par.iter_initial+1:par.iter_initial+1+(par.N-1)); 
                            par.G_1;
                            par.G_2;
                            par.G_3;
@@ -111,8 +106,8 @@ function [par, OptResNLP] = run_simulation_nlp(par, args, solver, s_0, t_0, fina
                            ];
     
     % initialize minimal/maximal velocity constraint
-    args.lbx(1:par.n_states:par.n_states*(par.N+1),1) = 55/3.6; %par.Route.min_v(par.iter_initial+1:par.iter_initial+par.N+1);
-    args.ubx(1:par.n_states:par.n_states*(par.N+1),1) = par.Route.max_v(par.iter_initial+1:par.iter_initial+par.N+1);
+    args.lbx(1:par.n_states:par.n_states*(par.N+1),1) = 55/3.6; %par.route.min_v(par.iter_initial+1:par.iter_initial+par.N+1);
+    args.ubx(1:par.n_states:par.n_states*(par.N+1),1) = par.route.max_v(par.iter_initial+1:par.iter_initial+par.N+1);
     
     %% Initialize Randbedingungen
     % state velocity
@@ -121,8 +116,8 @@ function [par, OptResNLP] = run_simulation_nlp(par, args, solver, s_0, t_0, fina
     args.ubx(v_idx(end),1) = final_velocity_MPC +0.001;                     
     
     if final_velocity_MPC == -1
-        args.lbx(v_idx(end),1) = par.Route.max_v(par.iter_initial+par.N+1)*0.75;                    
-        args.ubx(v_idx(end),1) = par.Route.max_v(par.iter_initial+par.N+1); 
+        args.lbx(v_idx(end),1) = par.route.max_v(par.iter_initial+par.N+1)*0.75;                    
+        args.ubx(v_idx(end),1) = par.route.max_v(par.iter_initial+par.N+1); 
     end
 
     % state battery energy

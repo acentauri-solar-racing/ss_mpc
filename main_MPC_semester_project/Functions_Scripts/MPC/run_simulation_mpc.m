@@ -1,19 +1,20 @@
 %% Ngo Tony
 % This code was written with MATLAB R2022b. Errors may occur with other
-% versions, last updated: 06.09.2023
+% versions, last updated: 04.10.2023
 %% Description 
 % This function initializes all the variables needed for the mpc simulation
 % loop, run the actual simulation and stores the results 
 
 % INPUT: 
-% "par": parameters struct,
-% "args": argument struct needed for solver
-% "f": symbolic function of states dynamics used in function "shift"
+% "par" (struct): parameters struct,
+% "args" (struct): argument struct needed for solver
+% "f" (function): symbolic function of states dynamics used in function "shift"
 % "solver": solver to find optimal states and control inputs
 
 % OUTPUT : 
-% "par": parameters struct, added new parameters
-% "OptRes": Optimization results
+% "par" (struct): parameters struct, added new parameters
+% "OptRes" (struct): Optimization results
+
 % "OptRes.xx": states at every step
 % "OptRes.u_cl": control inputs at every step
 % "OptRes.xx1": computed states trajectory

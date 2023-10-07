@@ -1,15 +1,15 @@
 %% Ngo Tony
 % This code was written with MATLAB R2022b. Errors may occur with other
-% versions, last updated: 06.09.2023
+% versions, last updated: 04.10.2023
 %% Description 
 % INPUT: 
 % "par": parameters struct (see function "load parameters")
-% "states":
-% "controls":
-% "var":
+% "states": (velocity, battery energy, time)
+% "controls": (electric motor, brake)
+% "var": (inclination prediction, polynomials parameters weather fit)
 
 % OUTPUT : 
-% "dE_bat"
+% "dE_bat": dynamics battery energy
 
 %% right hand side state of charge
 function dE_bat = dE_bat_rhs(par, states, controls, var)
