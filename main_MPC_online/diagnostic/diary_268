@@ -1,0 +1,44 @@
+Total number of variables............................:     1255
+                     variables with only lower bounds:        2
+                variables with lower and upper bounds:     1002
+                     variables with only upper bounds:        0
+Total number of equality constraints.................:      753
+Total number of inequality constraints...............:      252
+        inequality constraints with only lower bounds:        1
+   inequality constraints with lower and upper bounds:      251
+        inequality constraints with only upper bounds:        0
+
+
+Number of Iterations....: 43
+
+                                   (scaled)                 (unscaled)
+Objective...............:   9.3370038748955011e+00    9.3370038748955011e+00
+Dual infeasibility......:   2.5106168321649377e-14    2.5106168321649377e-14
+Constraint violation....:   3.7252902984619141e-09    3.7252902984619141e-09
+Variable bound violation:   9.7402399753840615e-09    9.7402399753840615e-09
+Complementarity.........:   2.5059045865629001e-09    2.5059045865629001e-09
+Overall NLP error.......:   3.7252902984619141e-09    3.7252902984619141e-09
+
+
+Number of objective function evaluations             = 44
+Number of objective gradient evaluations             = 44
+Number of equality constraint evaluations            = 44
+Number of inequality constraint evaluations          = 44
+Number of equality constraint Jacobian evaluations   = 44
+Number of inequality constraint Jacobian evaluations = 44
+Number of Lagrangian Hessian evaluations             = 43
+Total seconds in IPOPT                               = 0.620
+
+EXIT: Optimal Solution Found.
+<a href="matlab: opentoline('C:\casadi-3.6.3-windows64-matlab2018b\SwigRef.m',1,1)">1   </a>classdef SwigRef < handle
+if system_dependent('IsDebugMode')==1, dbquit; end
+main_v4
+{<a href="matlab: opentoline('C:\Users\loito\Desktop\alphacentauri_shared\ss_mpc\main_MPC_online\Functions_Scripts\MPC\run_simulation_mpc.m',225,26)">File: run_simulation_mpc.m Line: 225 Column: 26</a>
+Incorrect use of '=' operator. Assign a value to a variable using
+'=' and compare values for equality using '=='.
+
+Error in <a href="matlab:matlab.internal.language.introspective.errorDocCallback('main_v4', 'C:\Users\loito\Desktop\alphacentauri_shared\ss_mpc\main_MPC_online\main_v4.m', 55)" style="font-weight:bold">main_v4</a> (<a href="matlab: opentoline('C:\Users\loito\Desktop\alphacentauri_shared\ss_mpc\main_MPC_online\main_v4.m',55,0)">line 55</a>)
+    [par, OptRes] = run_simulation_mpc(par, weather, args, f, solver, par.s_0, par.t_0);
+} 
+opentoline('C:\Users\loito\Desktop\alphacentauri_shared\ss_mpc\main_MPC_online\Functions_Scripts\MPC\run_simulation_mpc.m',225,26)
+main_v4
