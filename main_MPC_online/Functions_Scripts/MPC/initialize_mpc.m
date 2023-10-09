@@ -86,6 +86,8 @@ function [par, f, obj, X, U, P, S1, S2] = initialize_mpc(par)
     U = SX.sym('U', par.n_controls, par.N);     
 
     % setup symbolic definition of parameters over the entire horizon
+    % P contains: x0, inclination prediction, polynomial parameters, SoC
+    % target at N, previous input
     P = SX.sym('P', par.n_states + par.N + 12 +1);               
     
     % setup symbolic definition of slack variable, needed only for the last

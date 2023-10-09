@@ -121,7 +121,6 @@ function [par, OptRes] = run_simulation_mpc_online(par, weather, args, f, solver
     while par.iter_mpc < par.iter_mpc_max
         iter_time_1 = tic;
         iter_time_3 = tic;
-        
         % update actual position 
         OptRes.xdist(par.iter_mpc+1) = s_0+par.s_step;
         
@@ -175,14 +174,17 @@ function [par, OptRes] = run_simulation_mpc_online(par, weather, args, f, solver
         
         iter_time_1 = toc(iter_time_1);
         %%
-        if iter_time_1+iter_time_2 < par.s_step/x0(1)
+
+        
+        if iter_time_1+iter_time_2-0.1 < par.s_step/x0(1)
             pause(par.s_step/x0(1)-iter_time_1-iter_time_2)
         else
             disp('mpc slower than car')
             OptRes.skip = OptRes.skip+1;
         end
+        
         iter_time_2 = tic;
-
+        
         % advance simulation, update real plant
         [s_0, x0, u0] = shift(par.s_step, s_0, x0, u, f, [par.route.incl(par.iter_initial+par.iter_mpc+1); ...
                                                            p_G_r(1);
@@ -224,7 +226,7 @@ function [par, OptRes] = run_simulation_mpc_online(par, weather, args, f, solver
         % update the maximal velocity constraint
         args.ubg(par.n_states*(par.N+1)+2:par.n_states*(par.N+1)+1+par.N+1) = par.route.max_v(par.iter_initial+par.iter_mpc+1:par.iter_initial+par.N+1+par.iter_mpc);
         args.ubx(1:par.n_states:par.n_states*(par.N+1),1) = par.route.max_v(par.iter_initial+par.iter_mpc+1:par.iter_initial+par.N+1+par.iter_mpc)+10;                     
-
+        
         %% ADD disturbances
         % x0(1) = x0(1) + rand()*1/3.6 - rand()*1/3.6;
         % x0(2) = x0(2) + rand()*par.E_bat_max*0.000001 - rand()*par.E_bat_max*0.000001;
@@ -251,12 +253,13 @@ function [par, OptRes] = run_simulation_mpc_online(par, weather, args, f, solver
         % update iter_mpc
         par.iter_mpc
         par.iter_mpc = par.iter_mpc + 1;
-
         iter_time_2 = toc(iter_time_2);
+        iter_time_3 = toc(iter_time_3);
         OptRes.iter_time = [OptRes.iter_time; iter_time_3];
     end
     
     main_loop_time = toc(main_loop);
+    OptRes.online_time = main_loop_time
     OptRes.average_mpc_time = main_loop_time/(par.iter_mpc+1)
 
     par.final_velocity = OptRes.xx(1,end);

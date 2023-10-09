@@ -4,15 +4,34 @@
 % 3. initialize_constraints
 % 4. initialize_solver
 % 2. run_simulation
-setup
+clear all
+close all
+clc
+
+import casadi.*
+
+warning('off');
+addpath('..\..\ss_offline_data\route\BWSC');
+
+addpath('..\..\ss_offline_data\parameters');
+addpath('..\..\ss_offline_data\route');
+
+addpath("Functions_Scripts\");
+addpath("Functions_Scripts\Model");
+addpath("Functions_Scripts\load_function");
+addpath("Functions_Scripts\MPC");
+addpath("Functions_Scripts\NLP");
+
+addpath("OfflineData\");
+addpath("OnlineData\");
 
 
 %% Set main parameters
-t_0 = 60*60*8.5;                          % initial time in s
+t_0 = 60*60*15;                          % initial time in s
 %t_0 = get_machine_time_s(); % machine time
-s_0 = 0;                    % [m] initial position, s_0 >= DP_s_0
+s_0 = 220000;                    % [m] initial position, s_0 >= DP_s_0
 
-s_f = 10000;        % [m] final position, s_f > s_0
+s_f = s_0 + 10000;        % [m] final position, s_f > s_0
 step = 100;          % [m] simulation step
 N = 100;             % [-] prediction horizon
 N_t = 60*15*2.5;        % [-] weather fit horizon
@@ -62,9 +81,11 @@ solver = initialize_solver_mpc(par, obj, g_mpc, X, U, P, S1, S2);
 
 %% Print final time, plot data
 
-final_time_min = (OptRes.xx(3,end)-t_0)/60              % [min]      args.ubx(1:par.n_states:par.n_states*(par.N+1),1) = par.Route.max_v(par.iter_initial+par.iter_mpc+1:par.iter_initial+par.N+1+par.iter_mpc)*1.1;                     
-computational_time_MPC = OptRes.average_mpc_time/((s_f-s_0)/step)
-OptRes.average_mpc_time = OptRes.average_mpc_time
+final_time = (OptRes.xx(3,end)-t_0)              % [min]      args.ubx(1:par.n_states:par.n_states*(par.N+1),1) = par.Route.max_v(par.iter_initial+par.iter_mpc+1:par.iter_initial+par.N+1+par.iter_mpc)*1.1;                     
+online_time = OptRes.online_time
+
+average_computational_time_MPC = OptRes.average_mpc_time
+
 vf_MPC = OptRes.xx(1,end)
 SoC_MPC = OptRes.xx(2,end)/par.E_bat_max
 

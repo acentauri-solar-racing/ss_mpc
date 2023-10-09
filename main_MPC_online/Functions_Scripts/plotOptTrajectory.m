@@ -25,7 +25,7 @@ function plotOptTrajectory(OptRes, par, s, x0)
     plot(OptRes.trajectory(2:end,1)*3.6, 'LineWidth', 1.5, 'Color', 'b')
     plot(par.route.max_v(par.iter_initial+par.iter_mpc+1:par.iter_initial+par.N+1+par.iter_mpc)*3.6, 'LineWidth', 0.5, 'Color', 'r')
     title('velocity'); % Set a title
-    ylim([0 140]);
+    ylim([40 140]);
     legend('car', 'predicted', 'max');
     xlabel('[km]'); % Label x-axis
     ylabel('[km/h]'); % Label y-axis
@@ -62,6 +62,8 @@ function plotOptTrajectory(OptRes, par, s, x0)
     xlabel('[km]'); % Label x-axis
     ylabel('[W]'); % Label y-axis
     ylim([-2500 2500]);
+    mean_input = mean(OptRes.u_trajectory(:,1));
+    yline(mean_input,'-', ['mean = ', num2str(mean_input)] ,'Color','g');
 
     % Calculate the new tick positions and labels
     new_tick_positions = get(gca, 'XTick');
@@ -69,6 +71,7 @@ function plotOptTrajectory(OptRes, par, s, x0)
     % Set the new tick positions and labels
     set(gca, 'XTick', new_tick_positions);
     set(gca, 'XTickLabel', new_tick_labels);
+
 
     drawnow; % Refresh the figure window
 end

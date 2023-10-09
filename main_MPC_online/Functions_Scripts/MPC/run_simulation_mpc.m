@@ -226,7 +226,7 @@ function [par, OptRes] = run_simulation_mpc(par, weather, args, f, solver, s_0, 
         OptRes.xx(:,par.iter_mpc+2) = x0;                     
         
         %% Online Plot
-        plotOptTrajectory(OptRes, par, s_0, x0)
+        %plotOptTrajectory(OptRes, par, s_0, x0)
         
         %%
         % get states trajectory to use as "args.x0"
@@ -239,18 +239,11 @@ function [par, OptRes] = run_simulation_mpc(par, weather, args, f, solver, s_0, 
         par.iter_mpc
         par.iter_mpc = par.iter_mpc + 1;
 
-%         if sum(iter_time) > 60*15*change
-%             % upload new weather data, this is made only for testing
-%             disp('waiting for new weather data uplodad')
-%             change = change+1;
-%             waitforbuttonpress
-%             disp('loaded')
-%             load('G:\Shared drives\AlphaCentauri\SolarCar_22 23\6. Strategy & Simulation\ss_online_data\Forecast\WeatherDataTest.mat')
-%         end
     end
     
     main_loop_time = toc(main_loop);
     OptRes.average_mpc_time = main_loop_time/(par.iter_mpc+1)
+    OptRes.online_time = main_loop_time
 
     par.final_velocity = OptRes.xx(1,end);
     par.final_E_bat = OptRes.xx(2,end);

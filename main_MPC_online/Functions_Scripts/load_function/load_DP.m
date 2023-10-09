@@ -29,8 +29,6 @@ function par = load_DP(par, DP_step, filenamepath)
         par.v_DP_raw = load(filenamepath).OptRes.states.V; % [m/s]
         par.P_mot_el_DP_raw = load(filenamepath).OptRes.inputs.P_mot_el; % [W]
 
-
-
         % length raw data (<= data length of entire race)
         len = length(par.E_bat_target_DP_raw);
         len_u = length(par.P_mot_el_DP_raw);
@@ -46,8 +44,9 @@ function par = load_DP(par, DP_step, filenamepath)
 
         % Concatenate the filler vector with the original_vector, so that
         % it has the full data length of the race (full_len)
-        par.E_bat_target_DP_raw = [filler, par.E_bat_target_DP_raw];
-        par.v_DP_raw = [filler, par.E_bat_target_DP_raw];
-        par.P_mot_el_DP_raw = [filler_u, par.P_mot_el_DP_raw];
+        par.E_bat_target_DP = [filler, par.E_bat_target_DP];
+        par.v_DP_raw = [filler, par.E_bat_target_DP];
+        par.P_mot_el_DP = [filler_u, par.P_mot_el_DP];
+
 
 end
