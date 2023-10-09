@@ -1,35 +1,3 @@
-Total number of variables............................:     1255
-                     variables with only lower bounds:        2
-                variables with lower and upper bounds:     1002
-                     variables with only upper bounds:        0
-Total number of equality constraints.................:      753
-Total number of inequality constraints...............:      252
-        inequality constraints with only lower bounds:        1
-   inequality constraints with lower and upper bounds:      251
-        inequality constraints with only upper bounds:        0
-
-
-Number of Iterations....: 54
-
-                                   (scaled)                 (unscaled)
-Objective...............:   9.9836896610286665e+00    9.9836896610286665e+00
-Dual infeasibility......:   2.5419929377033142e-14    2.5419929377033142e-14
-Constraint violation....:   3.7252902984619141e-09    3.7252902984619141e-09
-Variable bound violation:   9.7389081119099111e-09    9.7389081119099111e-09
-Complementarity.........:   2.5059035922986136e-09    2.5059035922986136e-09
-Overall NLP error.......:   3.7252902984619141e-09    3.7252902984619141e-09
-
-
-Number of objective function evaluations             = 59
-Number of objective gradient evaluations             = 55
-Number of equality constraint evaluations            = 59
-Number of inequality constraint evaluations          = 59
-Number of equality constraint Jacobian evaluations   = 55
-Number of inequality constraint Jacobian evaluations = 55
-Number of Lagrangian Hessian evaluations             = 54
-Total seconds in IPOPT                               = 0.655
-
-EXIT: Optimal Solution Found.
 Total number of variables............................:      505
                      variables with only lower bounds:        2
                 variables with lower and upper bounds:      402
@@ -41,24 +9,24 @@ Total number of inequality constraints...............:      102
         inequality constraints with only upper bounds:        0
 
 
-Number of Iterations....: 78
+Number of Iterations....: 73
 
                                    (scaled)                 (unscaled)
-Objective...............:   8.3063872483271872e+00    8.3063872483271872e+00
-Dual infeasibility......:   1.3759302228535114e-12    1.3759302228535114e-12
-Constraint violation....:   3.7252902984619141e-09    1.8626451492309570e-08
-Variable bound violation:   0.0000000000000000e+00    0.0000000000000000e+00
-Complementarity.........:   9.1047933871833658e-10    9.1047933871833658e-10
-Overall NLP error.......:   3.7252902984619141e-09    1.8626451492309570e-08
+Objective...............:   3.7150974471375255e-02    3.7150974471375253e+00
+Dual infeasibility......:   1.4210854715202004e-14    1.4210854715202004e-12
+Constraint violation....:   3.7252902984619141e-09    3.7252902984619141e-09
+Variable bound violation:   9.9909090909084834e-09    9.9909090909084834e-09
+Complementarity.........:   9.0909090927993073e-10    9.0909090927993077e-08
+Overall NLP error.......:   3.7252902984619141e-09    9.0909090927993077e-08
 
 
-Number of objective function evaluations             = 79
-Number of objective gradient evaluations             = 79
-Number of equality constraint evaluations            = 79
-Number of inequality constraint evaluations          = 79
-Number of equality constraint Jacobian evaluations   = 79
-Number of inequality constraint Jacobian evaluations = 79
-Number of Lagrangian Hessian evaluations             = 78
-Total seconds in IPOPT                               = 0.429
+Number of objective function evaluations             = 103
+Number of objective gradient evaluations             = 74
+Number of equality constraint evaluations            = 103
+Number of inequality constraint evaluations          = 103
+Number of equality constraint Jacobian evaluations   = 74
+Number of inequality constraint Jacobian evaluations = 74
+Number of Lagrangian Hessian evaluations             = 73
+Total seconds in IPOPT                               = 0.367
 
 EXIT: Optimal Solution Found.

@@ -21,12 +21,11 @@
 % "par": added mpc parameters
 
 %% General
-function par = get_mpc_param(par, s_0, t_0, s_step, N, s_tot, S1_weight, S2_weight)
+function par = get_mpc_param(par, s_0, t_0, s_step, N, N_t, s_tot, S1_weight, S2_weight)
         %% Discretization variables
         par.s_step = s_step;                % [m]
         par.N = N;                      % [-] Horizon length
-        par.N_t = par.N*par.s_step/15;   % [s] Horizon length in seconds
-        %par.N_t = 60*30;
+        par.N_t = N_t;   % [s] Horizon length in seconds
 
         par.s_step_DP = 10000;          % [m] do not change
         

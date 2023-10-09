@@ -29,7 +29,7 @@
 % "OptRes.xSoC_diff(r)": Difference between Battery Energy(k+N) and Battery Energy target(k+N)
 % "OptRes.xdist(r)": distance vector
 
-function [par, OptRes] = run_simulation_mpc(par, weather, args, f, solver, s_0, t_0)
+function [par, OptRes] = run_simulation_mpc(par, weather, args, f, solver, s_0, DP_s_0, t_0)
     % Start MPC
     
     % overall iteration position, s = 0 => iter_initial = 0
@@ -54,7 +54,7 @@ function [par, OptRes] = run_simulation_mpc(par, weather, args, f, solver, s_0, 
     S1_0 =  0;                                
     S2_0 = 0;
     % initialize optimal input vector
-    OptRes.u_cl=[0,0];     
+    OptRes.u_cl=[];     
     
     % initialize state save vector and slack save vector
     OptRes.xx(:,1) = x0;                    
@@ -63,11 +63,8 @@ function [par, OptRes] = run_simulation_mpc(par, weather, args, f, solver, s_0, 
 
     
     % initialize state trajectory vector for every MPC iteration
-    OptRes.xx1 = zeros(par.N+1,par.n_states, par.s_tot/par.s_step); 
-    OptRes.ux1 = zeros(par.N,par.n_controls, par.s_tot/par.s_step);                       
-    
+    OptRes.xx1 = zeros(par.N+1,par.n_states, par.s_tot/par.s_step);                       
     OptRes.xdist(1) = s_0;
-    s = s_0;
     
     % initialize trajectory control input vector (used as a "warm start" for
     % solver)
@@ -75,41 +72,35 @@ function [par, OptRes] = run_simulation_mpc(par, weather, args, f, solver, s_0, 
     
     % initialize trajectory states vector (used as a "warm start" for
     % solver)
-    X0 = repmat(x0,1,par.N+1)';          
-    
+    X0 = repmat(x0,1,par.N+1)';     
+
     %% Initialize Weather Data
     
     % initialize road inclination vector
     par.route.incl = par.route.incl';                                   
     
     % initialize battery energy target vector
-    SoC_target = par.E_bat_target_DP;
+    par.SoC_target = par.E_bat_target_DP;
     
     % initialize polynomial fit of G, fW
-    [par.G_1, par.G_2, par.G_3] = get_poly(weather.G_data, t_0, t_0 + 60*15*1*1);
-    [par.fW_1, par.fW_2, par.fW_3] = get_poly(weather.fW_data, t_0, t_0 + 60*15*1*1);
-    [par.sW_1, par.sW_2, par.sW_3] = get_poly(weather.sW_data, t_0, t_0 + 60*15*1*1);
-    [par.temp_1, par.temp_2, par.temp_3] = get_poly(weather.temp_data, t_0, t_0 + 60*15*1*1);
+    [p_G, p_fW, p_rho, p_temp] = get_polynomial_weather_fit(weather, par, t_0, par.N_t);
+    [p_G_r, p_fW_r, p_rho_r, p_temp_r] = get_polynomial_weather_fit(weather, par, t_0, 0);
 
-    [par.G_1r, par.G_2r, par.G_3r] = get_poly(weather.G_data, t_0, t_0 + 60*15*1*1);
-    [par.fW_1r, par.fW_2r, par.fW_3r] = get_poly(weather.fW_data, t_0, t_0 + 60*15*1*1);
-    [par.sW_1r, par.sW_2r, par.sW_3r] = get_poly(weather.sW_data, t_0, t_0 + 60*15*1*1);
-    [par.temp_1r, par.temp_2r, par.temp_3r] = get_poly(weather.temp_data, t_0, t_0 + 60*15*1*1);
 
     % initialize parameters/prediction (warm start)
     vars_update_pred = [par.route.incl(par.iter_initial+par.iter_mpc+1:par.iter_initial+par.iter_mpc+1+(par.N-1)); 
-                           par.G_1;
-                           par.G_2;
-                           par.G_3;
-                           par.fW_1;
-                           par.fW_2;
-                           par.fW_3;
-                           par.sW_1;
-                           par.sW_2;
-                           par.sW_3;
-                           par.temp_1;
-                           par.temp_2;
-                           par.temp_3
+                           p_G(1);
+                           p_G(2);
+                           p_G(3);
+                           p_fW(1);
+                           p_fW(2);
+                           p_fW(3);
+                           p_rho(1);
+                           p_rho(2);
+                           p_rho(3);
+                           p_temp(1);
+                           p_temp(2);
+                           p_temp(3)
                            ];
     
     % initialize minimal/maximal velocity constraint
@@ -118,17 +109,18 @@ function [par, OptRes] = run_simulation_mpc(par, weather, args, f, solver, s_0, 
     args.ubx(1:par.n_states:par.n_states*(par.N+1),1) = par.route.max_v(par.iter_initial+par.iter_mpc+1:par.iter_initial+par.N+1+par.iter_mpc)+10;                     
 
     %% Simulation Loop
-    iter_time = [];
+
+
     main_loop = tic;
     change = 1;
 
     while par.iter_mpc < par.iter_mpc_max
-        iter_time_tic = tic;
+
         % update actual position 
-        OptRes.xdist(par.iter_mpc+1) = s_0;
+        OptRes.xdist(par.iter_mpc+1) = s_0+par.s_step;
         
         % update parameters "P" vector
-        args.p = [x0; vars_update_pred; SoC_target(par.iter_initial+par.N+par.iter_mpc)]; 
+        args.p = [x0; vars_update_pred; par.SoC_target(par.N+par.iter_initial+par.iter_mpc)]; 
        
         % update optimization variables vector
         args.x0  = [reshape(X0',par.n_states*(par.N+1),1);reshape(u0',par.n_controls*par.N,1); S1_0; S2_0]; 
@@ -156,69 +148,63 @@ function [par, OptRes] = run_simulation_mpc(par, weather, args, f, solver, s_0, 
         OptRes.xS2(par.iter_mpc+1) = reshape(full(sol.x(end))',1,1)';
         
         %%
-        % store weather condition Data (real)
-        OptRes.xGr(par.iter_mpc+1) = par.G_1r*(x0(3)/60/15)^2 + par.G_2r*(x0(3)/60/15) + par.G_3r;
-        OptRes.xfWr(par.iter_mpc+1) = par.fW_1r*(x0(3)/60/15)^2 + par.fW_2r*(x0(3)/60/15) + par.fW_3r;
-        OptRes.xsWr(par.iter_mpc+1) = par.sW_1r*(x0(3)/60/15)^2 + par.sW_2r*(x0(3)/60/15) + par.sW_3r;
-        OptRes.xtempr(par.iter_mpc+1) = par.temp_1r*(x0(3)/60/15)^2 + par.temp_2r*(x0(3)/60/15) + par.temp_3r;
+        % store weather condition Data (perfect fit)
+        OptRes.xGr(par.iter_mpc+1) = p_G_r(1)*(x0(3)/60/15)^2 + p_G_r(2)*(x0(3)/60/15) + p_G_r(3);
+        OptRes.xfWr(par.iter_mpc+1) = p_fW_r(1)*(x0(3)/60/15)^2 + p_fW_r(2)*(x0(3)/60/15) + p_fW_r(3);
+        OptRes.xrhor(par.iter_mpc+1) = p_rho_r(1)*(x0(3)/60/15)^2 + p_rho_r(2)*(x0(3)/60/15) + p_rho_r(3);
+        OptRes.xtempr(par.iter_mpc+1) = p_temp_r(1)*(x0(3)/60/15)^2 + p_temp_r(2)*(x0(3)/60/15) + p_temp_r(3);
 
-        % store weather condition Data (predicted by mpc)
-        OptRes.xG(par.iter_mpc+1) = par.G_1*(x0(3)/60/15)^2 + par.G_2*(x0(3)/60/15) + par.G_3;
-        OptRes.xfW(par.iter_mpc+1) = par.fW_1*(x0(3)/60/15)^2 + par.fW_2*(x0(3)/60/15) + par.fW_3;
-        OptRes.xsW(par.iter_mpc+1) = par.sW_1*(x0(3)/60/15)^2 + par.sW_2*(x0(3)/60/15) + par.sW_3;
-        OptRes.xtemp(par.iter_mpc+1) = par.temp_1*(x0(3)/60/15)^2 + par.temp_2*(x0(3)/60/15) + par.temp_3;
+        % store weather condition Data (fit for mpc)
+        OptRes.xG(par.iter_mpc+1) = p_G(1)*(x0(3)/60/15)^2 + p_G(2)*(x0(3)/60/15) + p_G(3);
+        OptRes.xfW(par.iter_mpc+1) = p_fW(1)*(x0(3)/60/15)^2 + p_fW(2)*(x0(3)/60/15) + p_fW(3);
+        OptRes.xrho(par.iter_mpc+1) = p_rho(1)*(x0(3)/60/15)^2 + p_rho(2)*(x0(3)/60/15) + p_rho(3);
+        OptRes.xtemp(par.iter_mpc+1) = p_temp(1)*(x0(3)/60/15)^2 + p_temp(2)*(x0(3)/60/15) + p_temp(3);
         
         %%
         % store battery energy target at horizon N
-        %OptRes.xSoC_N(par.iter_mpc+1) = SoC_target(par.iter_initial+par.N+par.iter_mpc);
+        %OptRes.xSoC_N(par.iter_mpc+1) = par.SoC_target(par.iter_initial+par.N+par.iter_mpc);
     
         % store battery energy difference between prediction and target
-        OptRes.xSoC_diff(par.iter_mpc+1) = OptRes.xx1(end,2,par.iter_mpc+1) - SoC_target(par.iter_initial+par.N+par.iter_mpc);
+        OptRes.xSoC_diff(par.iter_mpc+1) = OptRes.xx1(end,2,par.iter_mpc+1) - par.SoC_target(par.iter_initial+par.N+par.iter_mpc);
         
-        %%
-        % advance simulation, update real plant
-        [s, x0, u0] = shift(par.s_step, s, x0, u, f, [par.route.incl(par.iter_initial+par.iter_mpc+1); ...
-                                                           par.G_1r;
-                                                           par.G_2r;
-                                                           par.G_3r;
-                                                           par.fW_1r;
-                                                           par.fW_2r;
-                                                           par.fW_3r;
-                                                           par.sW_1r;
-                                                           par.sW_2r;
-                                                           par.sW_3r;
-                                                           par.temp_1r;
-                                                           par.temp_2r;
-                                                           par.temp_3r]);
+
+
+        %% advance simulation, update real plant
+        [s_0, x0, u0] = shift(par.s_step, s_0, x0, u, f, [par.route.incl(par.iter_initial+par.iter_mpc+1); ...
+                                                           p_G_r(1);
+                                                           p_G_r(2);
+                                                           p_G_r(3);
+                                                           p_fW_r(1);
+                                                           p_fW_r(2);
+                                                           p_fW_r(3);
+                                                           p_rho_r(1);
+                                                           p_rho_r(2);
+                                                           p_rho_r(3);
+                                                           p_temp_r(1);
+                                                           p_temp_r(2);
+                                                           p_temp_r(3)]);
         %%
     
         % give real online update
 
         %%
-        [par.G_1, par.G_2, par.G_3] = get_poly(weather.G_data, t_0, t_0 + 60*15*1*1);
-        [par.fW_1, par.fW_2, par.fW_3] = get_poly(weather.fW_data, t_0, t_0 + 60*15*1*1);
-        [par.sW_1, par.sW_2, par.sW_3] = get_poly(weather.sW_data, t_0, t_0 + 60*15*1*1);
-        [par.temp_1, par.temp_2, par.temp_3] = get_poly(weather.temp_data, t_0, t_0 + 60*15*1*1);
-
-        [par.G_1r, par.G_2r, par.G_3r] = get_poly(weather.G_data, t_0, t_0 + 60*15*1*1);
-        [par.fW_1r, par.fW_2r, par.fW_3r] = get_poly(weather.fW_data, t_0, t_0 + 60*15*1*1);
-        [par.sW_1r, par.sW_2r, par.sW_3r] = get_poly(weather.sW_data, t_0, t_0 + 60*15*1*1);
-        [par.temp_1r, par.temp_2r, par.temp_3r] = get_poly(weather.temp_data, t_0, t_0 + 60*15*1*1);
+        [p_G, p_fW, p_rho, p_temp] = get_polynomial_weather_fit(weather, par, x0(3), par.N_t);
+        [p_G_r, p_fW_r, p_rho_r, p_temp_r] = get_polynomial_weather_fit(weather, par, x0(3), 0);
 
         % update the weather/road variables
         vars_update_pred = [par.route.incl(par.iter_initial+par.iter_mpc+1 +1:par.iter_initial+par.iter_mpc+1+(par.N-1) +1); 
-                            par.G_1;
-                            par.G_2;
-                            par.G_3;
-                            par.fW_1;
-                            par.fW_2;
-                            par.fW_3;
-                            par.sW_1;
-                            par.sW_2;
-                            par.sW_3;
-                            par.temp_1;
-                            par.temp_2;
-                            par.temp_3];     
+                            p_G(1);
+                            p_G(2);
+                            p_G(3);
+                            p_fW(1);
+                            p_fW(2);
+                            p_fW(3);
+                            p_rho(1);
+                            p_rho(2);
+                            p_rho(3);
+                            p_temp(1);
+                            p_temp(2);
+                            p_temp(3)];     
         
         %%
         % update the maximal velocity constraint
@@ -240,8 +226,7 @@ function [par, OptRes] = run_simulation_mpc(par, weather, args, f, solver, s_0, 
         OptRes.xx(:,par.iter_mpc+2) = x0;                     
         
         %% Online Plot
-
-        plotOptTrajectory(OptRes, par, s, x0)
+        plotOptTrajectory(OptRes, par, s_0, x0)
         
         %%
         % get states trajectory to use as "args.x0"
@@ -253,9 +238,6 @@ function [par, OptRes] = run_simulation_mpc(par, weather, args, f, solver, s_0, 
         % update iter_mpc
         par.iter_mpc
         par.iter_mpc = par.iter_mpc + 1;
-
-        iter_time_interval = toc(iter_time_tic);
-        iter_time = [iter_time; iter_time_interval];
 
 %         if sum(iter_time) > 60*15*change
 %             % upload new weather data, this is made only for testing

@@ -5,88 +5,71 @@
 % 4. initialize_solver
 % 2. run_simulation
 setup
+
+
 %% Set main parameters
+t_0 = 60*60*8.5;                          % initial time in s
+%t_0 = get_machine_time_s(); % machine time
+s_0 = 0;                    % [m] initial position, s_0 >= DP_s_0
 
-s_0 = 0;        % initial position
-s_f = 50000;       % final position
-step = 100;         % simulation step
+s_f = 10000;        % [m] final position, s_f > s_0
+step = 100;          % [m] simulation step
+N = 100;             % [-] prediction horizon
+N_t = 60*15*2.5;        % [-] weather fit horizon
 
-t_0 = 0;            % initial time
-N = 100;             % prediction horizon
-
-N_NLP = round((s_f-s_0)/step);
-
-wS1 = 1e-3;         % slack 1 variable weight
+format = 'yyyymmdd_HHMMSS';
+filename = [datestr(datetime,format)+"_"+num2str(s_0)+"_"+num2str(s_f)];
+%% DP settings
+DP_s_0 = 0;    % [m] DP initial position
+DP_step = 10000;    % [m] DP resolution
+%% Slack Variable weights
+wS1 = 1e-3;          % slack 1 variable weight
 wS2 = 1e4;           % slack 2 variable weight
 
-% 1 run, ~= 1 not run
-run_mpc = 0;
-run_nlp = 1;
-
-% initialize structs
+%% initialize structs
 par = get_car_param();
 weather = struct;
 OptRes = struct;
 OptResNLP = struct;
 
-if run_mpc == 1
-    %% Load parameters
-    % (par struct, s_0, t_0, discretization step, horizon length, simulated distance, slack weight)
-    par = get_mpc_param(par, s_0, t_0, step, N, s_f-s_0, wS1, wS2);
-    % add route parameters
-    par = load_route(par);
-    % add DP solution
-    par = load_DP(par, 'OfflineData\Full_Race_20230607_9h_30min.mat');
-    % add weather data 
-    weather = load_weather(weather, "C:\Users\loito\Desktop\alphacentauri_shared\ss_mpc\main_MPC_semester_project\OnlineData\20230926_090342_SF\preprocess\");
-    %weather = load_weather_benchmark(weather);
+%% Load parameters
+% (par struct, s_0, t_0, discretization step, horizon length, simulated distance, slack weight)
+par = get_mpc_param(par, s_0, t_0, step, N, N_t, s_f-s_0, wS1, wS2);
+% add route parameters
+par = load_route(par);
+% add DP solution
+par = load_DP(par, DP_step, 'OfflineData\Full_Race_20230607_9h_30min.mat');
+% add weather data 
+weather = load_weather(weather, par.t_0, "G:\Shared drives\AlphaCentauri\SolarCar_22 23\6. Strategy & Simulation\ss_online_data\Forecast\20231008_094711_SF\preprocess\");
+%weather = load_weather_benchmark(weather);
 
 
-    %% Define variables for optimizer CasaDi
-    [par, f, obj, X, U, P, S1, S2] = initialize_mpc(par);
+%% Define variables for optimizer CasaDi
+[par, f, obj, X, U, P, S1, S2] = initialize_mpc(par);
 
-    %% Initialize constraints
-    [par, g_mpc, args] = initialize_constraints_mpc(par, f, X, U, P, S1, S2);
-    
-    %% Create solver
-    solver = initialize_solver_mpc(par, obj, g_mpc, X, U, P, S1, S2);
-    
-    %% Initialize Simulation
-    [par, OptRes] = run_simulation_mpc(par, weather, args, f, solver, par.s_0, par.t_0);
-    
-    %% Diagnostics
-    diagnostics = diagnostic(par.s_tot/par.s_step, OptRes.xdist);
-    feasible = diagnostics.alwaysFeasible
-end
+%% Initialize constraints
+[par, g_mpc, args] = initialize_constraints_mpc(par, f, X, U, P, S1, S2);
 
-if run_nlp == 1
-    %% NLP benchmark
-    par = get_nlp_param(par, s_0, t_0, step, N_NLP, s_f-s_0, wS1, wS2);
-    par = load_route(par);
-    par = load_DP(par, 'OfflineData\Full_Race_20230607_9h_30min.mat');
-    weather = load_weather(weather, "C:\Users\loito\Desktop\alphacentauri_shared\ss_mpc\main_MPC_semester_project\OnlineData\20230926_090342_SF\preprocess\");
-    %weather = load_weather_benchmark(weather);
+%% Create solver
+solver = initialize_solver_mpc(par, obj, g_mpc, X, U, P, S1, S2);
 
-    [par, f, obj, X, U, P, S1, S2] = initialize_nlp(par);
-    [par, g_nlp, args] = initialize_constraints_nlp(par, f, X, U, P, S1, S2);
-    solver = initialize_solver_nlp(par, obj, g_nlp, X, U, P, S1, S2);
-    [par, OptResNLP] = run_simulation_nlp(par, weather, args, solver, par.s_0, par.t_0, -1, -1, -1, -1);
-end
+%% Initialize Simulation
+[par, OptRes] = run_simulation_mpc_online(par, weather, args, f, solver, par.s_0, DP_s_0, par.t_0);
+
+%% Diagnostics
+% diagnostics = diagnostic(par.s_tot/par.s_step, OptRes.xdist);
+% feasible = diagnostics.alwaysFeasible
 
 %% Print final time, plot data
 
-if run_mpc == 1
-    final_time_min = OptRes.xx(3,end)/60              % [min]      args.ubx(1:par.n_states:par.n_states*(par.N+1),1) = par.Route.max_v(par.iter_initial+par.iter_mpc+1:par.iter_initial+par.N+1+par.iter_mpc)*1.1;                     
-    computational_time_MPC = OptRes.average_mpc_time*(s_f/step)
-    vf_MPC = OptRes.xx(1,end)
-    SoC_MPC = OptRes.xx(2,end)/par.E_bat_max
-end
+final_time_min = (OptRes.xx(3,end)-t_0)/60              % [min]      args.ubx(1:par.n_states:par.n_states*(par.N+1),1) = par.Route.max_v(par.iter_initial+par.iter_mpc+1:par.iter_initial+par.N+1+par.iter_mpc)*1.1;                     
+computational_time_MPC = OptRes.average_mpc_time/((s_f-s_0)/step)
+OptRes.average_mpc_time = OptRes.average_mpc_time
+vf_MPC = OptRes.xx(1,end)
+SoC_MPC = OptRes.xx(2,end)/par.E_bat_max
 
-if run_nlp == 1
-    final_time_NLP_min = OptResNLP.xx1(end,3)/60      % [min]  
-    computational_time_NLP = OptResNLP.nlp_time
-    vf_NLP = OptResNLP.xx1(end,1)
-    SoC_NLP = OptResNLP.xx1(end,2)/par.E_bat_max
-end
 
-visualize_plot(par, OptRes, OptResNLP, run_mpc, run_nlp)
+visualize_plot(par, OptRes)
+%% Save file
+save('G:\Shared drives\AlphaCentauri\SolarCar_22 23\6. Strategy & Simulation\ss_online_data\MPC_optimal\'+filename, "OptRes","par","weather")
+writematrix(OptRes.xx,'G:\Shared drives\AlphaCentauri\SolarCar_22 23\6. Strategy & Simulation\ss_online_data\MPC_optimal\'+filename+'_state.csv')

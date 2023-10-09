@@ -1,35 +1,3 @@
-Total number of variables............................:     1255
-                     variables with only lower bounds:        2
-                variables with lower and upper bounds:     1002
-                     variables with only upper bounds:        0
-Total number of equality constraints.................:      753
-Total number of inequality constraints...............:      252
-        inequality constraints with only lower bounds:        1
-   inequality constraints with lower and upper bounds:      251
-        inequality constraints with only upper bounds:        0
-
-
-Number of Iterations....: 116
-
-                                   (scaled)                 (unscaled)
-Objective...............:   9.9200793698668051e+00    9.9200793698668051e+00
-Dual infeasibility......:   2.6645352591003757e-14    2.6645352591003757e-14
-Constraint violation....:   3.7252902984619141e-09    3.7252902984619141e-09
-Variable bound violation:   9.7390480660553920e-09    9.7390480660553920e-09
-Complementarity.........:   2.5059035652910578e-09    2.5059035652910578e-09
-Overall NLP error.......:   3.7252902984619141e-09    3.7252902984619141e-09
-
-
-Number of objective function evaluations             = 117
-Number of objective gradient evaluations             = 117
-Number of equality constraint evaluations            = 117
-Number of inequality constraint evaluations          = 117
-Number of equality constraint Jacobian evaluations   = 117
-Number of inequality constraint Jacobian evaluations = 117
-Number of Lagrangian Hessian evaluations             = 116
-Total seconds in IPOPT                               = 1.591
-
-EXIT: Optimal Solution Found.
 Total number of variables............................:      505
                      variables with only lower bounds:        2
                 variables with lower and upper bounds:      402
@@ -41,24 +9,24 @@ Total number of inequality constraints...............:      102
         inequality constraints with only upper bounds:        0
 
 
-Number of Iterations....: 35
+Number of Iterations....: 63
 
                                    (scaled)                 (unscaled)
-Objective...............:   1.4676868902941525e+01    1.4676868902941525e+01
-Dual infeasibility......:   4.9706821860577735e-14    4.9706821860577735e-14
-Constraint violation....:   3.7252902984619141e-09    3.7252902984619141e-09
-Variable bound violation:   0.0000000000000000e+00    0.0000000000000000e+00
-Complementarity.........:   2.5059035714283628e-09    2.5059035714283628e-09
-Overall NLP error.......:   3.7252902984619141e-09    3.7252902984619141e-09
+Objective...............:   3.7010264590120703e-02    3.7010264590120703e+00
+Dual infeasibility......:   2.8421709430404007e-14    2.8421709430404007e-12
+Constraint violation....:   3.7252902984619141e-09    7.4505805969238281e-09
+Variable bound violation:   9.9749409643984850e-09    9.9749409643984850e-09
+Complementarity.........:   2.5059035644441088e-09    2.5059035644441086e-07
+Overall NLP error.......:   3.7252902984619141e-09    2.5059035644441086e-07
 
 
-Number of objective function evaluations             = 36
-Number of objective gradient evaluations             = 36
-Number of equality constraint evaluations            = 36
-Number of inequality constraint evaluations          = 36
-Number of equality constraint Jacobian evaluations   = 36
-Number of inequality constraint Jacobian evaluations = 36
-Number of Lagrangian Hessian evaluations             = 35
-Total seconds in IPOPT                               = 0.152
+Number of objective function evaluations             = 78
+Number of objective gradient evaluations             = 64
+Number of equality constraint evaluations            = 78
+Number of inequality constraint evaluations          = 78
+Number of equality constraint Jacobian evaluations   = 64
+Number of inequality constraint Jacobian evaluations = 64
+Number of Lagrangian Hessian evaluations             = 63
+Total seconds in IPOPT                               = 0.305
 
 EXIT: Optimal Solution Found.

@@ -1,6 +1,5 @@
-function visual = visualize_plot(par, OptRes, OptResNLP, run_mpc, run_nlp)
+function visual = visualize_plot(par, OptRes)
 %% States and Weather
-if run_mpc == 1 && run_nlp  ~= 1
     figure
     
     subplot(3,3,1)
@@ -24,11 +23,11 @@ if run_mpc == 1 && run_nlp  ~= 1
     
     subplot(3,3,4)
     plot(OptRes.xx(2,:)/par.E_bat_max), hold on
-    plot(par.E_bat_target_DP(1+par.iter_initial:par.iter_initial+size(OptRes.xx,2))/par.E_bat_max)
+    plot(par.SoC_target(1+par.iter_initial:1+par.iter_initial+size(OptRes.xx,2))/par.E_bat_max,'linewidth',0.5)
 %   plot(squeeze(OptRes.xx1(end,2,:))/par.E_bat_max)
 %    plot(OptRes.xSoC_N/par.E_bat_max);
     title('State of Charge')
-    legend('SoC(k)', 'SoC target DP(k)', 'SoC (predicted) (k+N)', 'SoC target (k+N)')
+    legend('SoC(k)', 'SoC target DP(k)')
     xlabel('[km]')
     ylabel('[-]')
     
@@ -121,13 +120,13 @@ if run_mpc == 1 && run_nlp  ~= 1
     set(gca, 'XTickLabel', new_tick_labels);
     
     subplot(3,3,6)
-    plot(OptRes.xsWr), hold on
-    plot(OptRes.xsW)
-    title('vel. side wind')
+    plot(OptRes.xrhor), hold on
+    plot(OptRes.xrho)
+    title('air Density')
     legend('real', 'predicted')
     xlim([0 par.s_tot/par.s_step])
     xlabel('[km]')
-    ylabel('[m/s]')
+    ylabel('[kg/m^3]')
     
     % Calculate the new tick positions and labels
     new_tick_positions = get(gca, 'XTick');
@@ -242,120 +241,3 @@ if run_mpc == 1 && run_nlp  ~= 1
     set(gca, 'XTickLabel', new_tick_labels);
 end
 
-%% Benchmark
-if run_nlp == 1 && run_mpc == 1
-    figure
-    subplot(3,1,1)
-    plot(OptResNLP.xx1(:,1)*3.6, 'LineStyle','--','linewidth',1.), hold on
-    plot(OptRes.xx(1,:)*3.6','linewidth',1.), hold on
-    
-    plot(par.route.max_v(1+par.iter_initial:par.iter_initial+size(OptRes.xx,2))*3.6,'-.', 'LineWidth', 0.5, 'Color', 'k')
-    
-    title('velocity')
-    legend('nlp', 'mpc', 'max velocity')
-    xlim([0 par.s_tot/par.s_step])
-    ylim([0; 150])
-    xlabel('[km]')
-    ylabel('[km/h]')
-    % Calculate the new tick positions and labels
-    new_tick_positions = get(gca, 'XTick');
-    new_tick_labels = arrayfun(@(x) num2str((x*par.s_step+par.s_0)/1000), new_tick_positions, 'UniformOutput', false);
-    % Set the new tick positions and labels
-    set(gca, 'XTick', new_tick_positions);
-    set(gca, 'XTickLabel', new_tick_labels);
-    
-    subplot(3,1,2)
-    
-    plot(OptResNLP.xx1(:,2)/par.E_bat_max, 'LineStyle','--','linewidth',1.), hold on
-    plot(OptRes.xx(2,:)/par.E_bat_max','linewidth',1.), hold on
-    plot(par.E_bat_target_DP(1+par.iter_initial:par.iter_initial+size(OptRes.xx,2))/par.E_bat_max)
-    
-    title('SoC')
-    legend('nlp', 'mpc', 'target')
-    xlim([0 par.s_tot/par.s_step])
-    xlabel('[km]')
-    ylabel('[-]')
-    % Calculate the new tick positions and labels
-    new_tick_positions = get(gca, 'XTick');
-    new_tick_labels = arrayfun(@(x) num2str((x*par.s_step+par.s_0)/1000), new_tick_positions, 'UniformOutput', false);
-    % Set the new tick positions and labels
-    set(gca, 'XTick', new_tick_positions);
-    set(gca, 'XTickLabel', new_tick_labels);
-    subplot(3,1,3)
-    
-    plot(OptResNLP.u_cl(:,1),'linewidth',1., 'LineStyle','--'), hold on
-    plot(OptRes.u_cl(:,1),'linewidth',1.)
-    
-    plot(OptResNLP.u_cl(:,2),'linewidth',0.1,'color','r', 'LineStyle','--')
-    plot(OptRes.u_cl(:,2),'linewidth',0.1,'color','g')
-    
-    title('Control Input')
-    legend('nlp',  'mpc', 'nlp (brake)', 'mpc (brake)')
-    xlim([0 par.s_tot/par.s_step])
-    xlabel('[km]')
-    ylabel('[W]')
-    
-    % Calculate the new tick positions and labels
-    new_tick_positions = get(gca, 'XTick');
-    new_tick_labels = arrayfun(@(x) num2str((x*par.s_step+par.s_0)/1000), new_tick_positions, 'UniformOutput', false);
-    % Set the new tick positions and labels
-    set(gca, 'XTick', new_tick_positions);
-    set(gca, 'XTickLabel', new_tick_labels);
-end
-
-
-%% NLP only
-if run_nlp == 1 && run_mpc ~= 1
-    figure
-    subplot(3,1,1)
-    plot(OptResNLP.xx1(:,1)*3.6, 'LineStyle','--','linewidth',1.), hold on
-    plot(par.route.max_v(1+par.iter_initial:par.iter_initial+par.N+1)*3.6,'-.', 'LineWidth', 0.5, 'Color', 'k')
-    
-    title('velocity')
-    legend('nlp', 'max velocity')
-    xlim([0 par.s_tot/par.s_step])
-    ylim([0; 150])
-    xlabel('[km]')
-    ylabel('[km/h]')
-    % Calculate the new tick positions and labels
-    new_tick_positions = get(gca, 'XTick');
-    new_tick_labels = arrayfun(@(x) num2str((x*par.s_step+par.s_0)/1000), new_tick_positions, 'UniformOutput', false);
-    % Set the new tick positions and labels
-    set(gca, 'XTick', new_tick_positions);
-    set(gca, 'XTickLabel', new_tick_labels);
-    
-    subplot(3,1,2)
-    
-    plot(OptResNLP.xx1(:,2)/par.E_bat_max, 'LineStyle','--','linewidth',1.), hold on
-    plot(par.E_bat_target_DP(1+par.iter_initial:par.iter_initial+par.N+1)/par.E_bat_max)
-    
-    title('SoC')
-    legend('nlp', 'target')
-    xlim([0 par.s_tot/par.s_step])
-    xlabel('[km]')
-    ylabel('[-]')
-    % Calculate the new tick positions and labels
-    new_tick_positions = get(gca, 'XTick');
-    new_tick_labels = arrayfun(@(x) num2str((x*par.s_step+par.s_0)/1000), new_tick_positions, 'UniformOutput', false);
-    % Set the new tick positions and labels
-    set(gca, 'XTick', new_tick_positions);
-    set(gca, 'XTickLabel', new_tick_labels);
-    subplot(3,1,3)
-    
-    plot(OptResNLP.u_cl(:,1),'linewidth',1., 'LineStyle','--'), hold on
-    plot(OptResNLP.u_cl(:,2),'linewidth',0.1,'color','r', 'LineStyle','--')
-    
-    title('Control Input')
-    legend('nlp', 'nlp (brake)')
-    xlim([0 par.s_tot/par.s_step])
-    xlabel('[km]')
-    ylabel('[W]')
-    
-    % Calculate the new tick positions and labels
-    new_tick_positions = get(gca, 'XTick');
-    new_tick_labels = arrayfun(@(x) num2str((x*par.s_step+par.s_0)/1000), new_tick_positions, 'UniformOutput', false);
-    % Set the new tick positions and labels
-    set(gca, 'XTick', new_tick_positions);
-    set(gca, 'XTickLabel', new_tick_labels);
-end
-end

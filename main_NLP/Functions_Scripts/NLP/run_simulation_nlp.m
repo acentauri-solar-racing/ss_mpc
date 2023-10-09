@@ -91,7 +91,7 @@ function [par, OptResNLP] = run_simulation_nlp(par, weather, args, solver, s_0, 
     % initialize polynomial fit of G, fW
     [par.G_1, par.G_2, par.G_3, par.G_4] = get_poly(weather.G_data, t_0, t_0 + par.N_t);
     [par.fW_1, par.fW_2, par.fW_3, par.fW_4] = get_poly(weather.fW_data, t_0, t_0 + par.N_t);
-    [par.sW_1, par.sW_2, par.sW_3, par.sW_4] = get_poly(weather.sW_data, t_0, t_0 + par.N_t);
+    [par.rho_1, par.rho_2, par.rho_3, par.rho_4] = get_poly(weather.rho_data, t_0, t_0 + par.N_t);
     [par.temp_1, par.temp_2, par.temp_3, par.temp_4] = get_poly(weather.temp_data, t_0, t_0 + par.N_t);
 
     % initialize parameters/prediction (warm start)
@@ -104,10 +104,10 @@ function [par, OptResNLP] = run_simulation_nlp(par, weather, args, solver, s_0, 
                            par.fW_2;
                            par.fW_3;
                            par.fW_4;
-                           par.sW_1;
-                           par.sW_2;
-                           par.sW_3;
-                           par.sW_4;
+                           par.rho_1;
+                           par.rho_2;
+                           par.rho_3;
+                           par.rho_4;
                            par.temp_1;
                            par.temp_2;
                            par.temp_3;

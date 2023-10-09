@@ -45,6 +45,7 @@ function [weather] = load_weather(weather, weatherfolderpath)
     fW_table = readtable(weatherfolderpath + "frontWind.csv", opts);
     sW_table = readtable(weatherfolderpath + "sideWind.csv", opts);
     temp_table = readtable(weatherfolderpath + "temperature.csv", opts);
+    rho_table = readtable(weatherfolderpath + "airDensity.csv", opts);
   
 %   temp_table = readtable("C:\Users\loito\Desktop\alphacentauri_shared\ss_mpc\main_MPC_v3_polynomial_weather\OnlineData\20230926_090342_SF\preprocess\temperature.csv", opts);
 
@@ -53,13 +54,22 @@ function [weather] = load_weather(weather, weatherfolderpath)
 %     sW_table = readtable("G:\Shared drives\AlphaCentauri\SolarCar_22 23\6. Strategy & Simulation\ss_online_data\20231001_155728_SF\preprocess\sideWind.csv", opts);
 %     temp_table = readtable("G:\Shared drives\AlphaCentauri\SolarCar_22 23\6. Strategy & Simulation\ss_online_data\20231001_155728_SF\preprocess\temperature.csv", opts);
     
-    weather.timeline = cell2mat(table2array(G_table(2:end,1)));
+    timeline_string = cell2mat(table2array(G_table(2:end,1)));
+    timeline_string = timeline_string(:,[12,13,15,16]);
+    weather.timeline_string = timeline_string;
+    weather.timeline = [];
+    for i = 1:length(timeline_string)
+        weather.timeline(i) = str2num(timeline_string(i,1))*10*60*60 + str2num(timeline_string(i,2))*60*60 + str2num(timeline_string(i,3))*10*60 + str2num(timeline_string(i,4))*60;
+    end
+    weather.timeline = weather.timeline';
     weather.cumdist = table2array(G_table(1,2:end));
     
     weather.G_data =  cellfun(@str2num,table2array(G_table(2:end, 2:end)));
     weather.fW_data = cellfun(@str2num,table2array(fW_table(2:end, 2:end)));
     weather.sW_data = cellfun(@str2num,table2array(sW_table(2:end, 2:end)));
     weather.temp_data = cellfun(@str2num,table2array(temp_table(2:end, 2:end)));
+    weather.rho_data = cellfun(@str2num,table2array(rho_table(2:end, 2:end)));
+
     
     
     %% Clear temporary variables

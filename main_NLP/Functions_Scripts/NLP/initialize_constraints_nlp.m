@@ -132,8 +132,8 @@ function [par, g_nlp, args] = initialize_constraints_nlp(par, f, X, U, P, S1, S2
     args.ubx(3:par.n_states:par.n_states*(par.N+1),1) = Inf;                    
     
     % control input electric motor
-    args.lbx(par.n_states*(par.N+1)+1:par.n_controls:par.n_states*(par.N+1)+par.n_controls*par.N,1) = -5000; 
-    args.ubx(par.n_states*(par.N+1)+1:par.n_controls:par.n_states*(par.N+1)+par.n_controls*par.N,1) = 5000; 
+    args.lbx(par.n_states*(par.N+1)+1:par.n_controls:par.n_states*(par.N+1)+par.n_controls*par.N,1) = -2500; 
+    args.ubx(par.n_states*(par.N+1)+1:par.n_controls:par.n_states*(par.N+1)+par.n_controls*par.N,1) = 2500; 
     
     % control input brake (no regen)
     args.lbx(par.n_states*(par.N+1)+2:par.n_controls:par.n_states*(par.N+1)+par.n_controls*par.N,1) = -1000;

@@ -41,19 +41,19 @@ function dE_bat = dE_bat_rhs_ext(par, states, controls, var)
 
     fW = fW_1*(t/60/15)^3 + fW_2*(t/60/15)^2 + fW_3*(t/60/15) + fW_4;
 
-    sW_1 = var(10);
-    sW_2 = var(11);
-    sW_3 = var(12);
-    sW_4 = var(13);
+    rho_1 = var(10);
+    rho_2 = var(11);
+    rho_3 = var(12);
+    rho_4 = var(13);
 
-    sW = sW_1*(t/60/15)^3 + sW_2*(t/60/15)^2 + sW_3*(t/60/15) + sW_4;
+    rho = rho_1*(t/60/15)^3 + rho_2*(t/60/15)^2 + rho_3*(t/60/15) + rho_4;
 
     temp_1 = var(14);
     temp_2 = var(15);
     temp_3 = var(16);
     temp_4 = var(17);
 
-    temp = temp_1*(t/60/15)^3 + temp_2*(t/60/15)^2 + temp_3*(t/60/15) + temp_4;
+    temp = temp_1*(t/60/15)^3 + temp_2*(t/60/15)^2 + temp_3*(t/60/15) + temp_4;    
     
     theta_NOCT = 50;             % [°C]
     S = 80;                     % [mW/cm^2]

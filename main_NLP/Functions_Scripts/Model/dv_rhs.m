@@ -2,6 +2,9 @@
 % This code was written with MATLAB R2022b. Errors may occur with other
 % versions, last updated: 04.10.2023
 %% Description 
+% This function outputs the right hand side of the velocity dynamic
+% differential
+% equation
 % INPUT: 
 % "par": parameters struct (see function "load parameters")
 % "states": (velocity, battery energy, time)
@@ -18,12 +21,10 @@ function dv = dv_rhs(par, states, controls, var)
     
     % states x and control u
     v = states(1);              % velocity
-    E_bat = states(2);            % state of charge
-    t = states(3);
+    E_bat = states(2);          % state of charge
+    t = states(3);              % time
     P_mot_el = controls(1);     % electric motor power
     P_brake = controls(2);
-
-    % space dependent parameters
 
     % road inclination
     alpha = var(1);             
@@ -33,37 +34,38 @@ function dv = dv_rhs(par, states, controls, var)
     G_2 = var(3);
     G_3 = var(4);
     G_4 = var(5);
-
-    G = G_1*(t/60/15)^3 + G_2*(t/60/15)^2 + G_3*(t/60/15) + G_4;
-
+    
+    % front wind velocity
     fW_1 = var(6);
     fW_2 = var(7);
     fW_3 = var(8);
     fW_4 = var(9);
 
-    fW = fW_1*(t/60/15)^3 + fW_2*(t/60/15)^2 + fW_3*(t/60/15) + fW_4;
+    % air density
+    rho_1 = var(10);
+    rho_2 = var(11);
+    rho_3 = var(12);
+    rho_4 = var(13);
 
-    sW_1 = var(10);
-    sW_2 = var(11);
-    sW_3 = var(12);
-    sW_4 = var(13);
-
-    sW = sW_1*(t/60/15)^3 + sW_2*(t/60/15)^2 + sW_3*(t/60/15) + sW_4;
-
+    % temperature
     temp_1 = var(14);
     temp_2 = var(15);
     temp_3 = var(16);
     temp_4 = var(17);
 
+    % polynomial fit of weather variables
+    G = G_1*(t/60/15)^3 + G_2*(t/60/15)^2 + G_3*(t/60/15) + G_4;
+    fW = fW_1*(t/60/15)^3 + fW_2*(t/60/15)^2 + fW_3*(t/60/15) + fW_4;
+    rho = rho_1*(t/60/15)^3 + rho_2*(t/60/15)^2 + rho_3*(t/60/15) + rho_4;
     temp = temp_1*(t/60/15)^3 + temp_2*(t/60/15)^2 + temp_3*(t/60/15) + temp_4;
           
-
+    % effective front velocity
     v_eff_front = fW + v;
-    v_eff = sqrt(sW^2 + v_eff_front^2);
+    %v_eff = sqrt(sW^2 + v_eff_front^2);
 
 
     % longitudinal power losses
-    P_a = 0.5* par.rho_a * par.Cd * par.Af * (v_eff_front)^2 * v;                 % aerodynamic loss
+    P_a = 0.5* rho * par.Cd * par.Af * (v_eff_front)^2 * v;                 % aerodynamic loss
     P_g = par.m_tot * par.g * sin(alpha) * v;                                     % inclination loss
     P_r = par.m_tot * par.g * par.Cr * cos(alpha) * v;                            % rolling friction loss
 
@@ -75,7 +77,8 @@ function dv = dv_rhs(par, states, controls, var)
 end
 
 
-
+% this function smooths the Willans line in a single smooth derivable
+% function
 function smooth_fun = P_mot_mec_sigmoid(P_mot_el, e_mot, P_0, k)
     % Sigmoid approximation for the transition step
     sigmoid = 1 ./ (1 + exp(-k * (P_mot_el - P_0)));

@@ -41,7 +41,7 @@ function plotOptTrajectory(OptRes, par, s, x0)
     subplot(3, 1, 2);
     plot(1,x0(2) / par.E_bat_max * 100, 'Color','green', 'Marker','square', 'MarkerSize', 8), hold on;
     plot(OptRes.trajectory(2:end,2)/ par.E_bat_max * 100, 'LineWidth', 1.5, 'Color', 'b')
-    plot(par.E_bat_target_DP(par.iter_initial+par.iter_mpc+1:par.iter_initial+par.N+1+par.iter_mpc)/ par.E_bat_max * 100, 'LineWidth', 0.5, 'Color', 'r')
+    plot(par.E_bat_target_DP(par.iter_initial +par.iter_mpc+1:par.iter_initial+par.N+1+par.iter_mpc)/ par.E_bat_max * 100, 'LineWidth', 0.5, 'Color', 'r')
     ylim([OptRes.xx(2, end) / par.E_bat_max * 100 - 2.5 OptRes.xx(2, end) / par.E_bat_max * 100 + 2.5]);
     legend('car', 'predicted', 'target');
     title('SoC'); % Set a title
@@ -61,7 +61,7 @@ function plotOptTrajectory(OptRes, par, s, x0)
     title('Electric Motor Input'); % Set a title
     xlabel('[km]'); % Label x-axis
     ylabel('[W]'); % Label y-axis
-    ylim([-5000 5000]);
+    ylim([-2500 2500]);
 
     % Calculate the new tick positions and labels
     new_tick_positions = get(gca, 'XTick');
