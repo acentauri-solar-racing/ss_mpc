@@ -265,5 +265,7 @@ function [par, OptRes] = run_simulation_mpc_online(par, weather, args, f, solver
     main_loop_time = toc(main_loop);
     OptRes.online_time = main_loop_time
     OptRes.average_mpc_time = main_loop_time/(par.iter_mpc+1)
+    par.final_velocity = OptRes.xx(1,end);
+    par.final_E_bat = OptRes.xx(2,end);
 
 end

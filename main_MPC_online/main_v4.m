@@ -38,6 +38,7 @@ init.s_step = 100;           % [m] simulation step
 init.N = 100;                % [-] prediction horizon
 init.N_t = 60*15*2.5;        % [-] weather fit horizon
 
+
 format = 'yyyymmdd_HHMMSS';
 filename = [datestr(datetime,format)+"_"+num2str(s_0)+"_"+num2str(s_f)];
 %% DP settings
