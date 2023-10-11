@@ -266,27 +266,4 @@ function [par, OptRes] = run_simulation_mpc_online(par, weather, args, f, solver
     OptRes.online_time = main_loop_time
     OptRes.average_mpc_time = main_loop_time/(par.iter_mpc+1)
 
-<<<<<<< HEAD:main_MPC_online/Functions/MPC/run_simulation_mpc_online.m
-end
-=======
-    par.final_velocity = OptRes.xx(1,end);
-    par.final_E_bat = OptRes.xx(2,end);
->>>>>>> parent of 4fec773 (include some comments, try to find possible bugs):main_MPC_online/Functions_Scripts/MPC/run_simulation_mpc_online.m
-
-
-function key_pressed = kbhit()
-    key_pressed = false;
-    if kbhit_available
-        key_pressed = true;
-    end
-end
-
-function available = kbhit_available
-    available = exist('OCTAVE_VERSION', 'builtin') == 5; % Check if it's Octave
-    if ~available
-        available = exist('OCTAVE_VERSION', 'var') ~= 0; % Check if it's MATLAB
-    end
-    if ~available
-        available = exist('Kbh', 'file') == 2; % Check if Kbh is a file in the current folder
-    end
 end
