@@ -113,8 +113,7 @@ function [par, OptRes] = run_simulation_mpc_online(par, weather, args, f, solver
 
     iter_time_1 = 0;
     iter_time_2 = 0;
-    OptRes.skip = 0;
-
+    printresult.alwaysonline = 1;
     main_loop = tic;
     change = 1;
 
@@ -180,7 +179,7 @@ function [par, OptRes] = run_simulation_mpc_online(par, weather, args, f, solver
             pause(par.s_step/x0(1)-iter_time_1-iter_time_2)
         else
             disp('mpc slower than car')
-            OptRes.skip = OptRes.skip+1;
+            printresult.alwaysonline = 0;
         end
         
         iter_time_2 = tic;
@@ -256,16 +255,11 @@ function [par, OptRes] = run_simulation_mpc_online(par, weather, args, f, solver
         iter_time_2 = toc(iter_time_2);
         iter_time_3 = toc(iter_time_3);
         OptRes.iter_time = [OptRes.iter_time; iter_time_3];
-
-        if kbhit()
-            break;
-        end
     end
-    
-    main_loop_time = toc(main_loop);
-    OptRes.online_time = main_loop_time
-    OptRes.average_mpc_time = main_loop_time/(par.iter_mpc+1)
-    par.final_velocity = OptRes.xx(1,end);
-    par.final_E_bat = OptRes.xx(2,end);
+    printresult.final_real_time_state = (OptRes.xx(3,end)-par.t_0);              % [min]      args.ubx(1:par.n_states:par.n_states*(par.N+1),1) = par.Route.max_v(par.iter_initial+par.iter_mpc+1:par.iter_initial+par.N+1+par.iter_mpc)*1.1;                     
+    printresult.online_mpc_time_state = OptRes.online_time;
+    printresult.average_mpc_time_computation_iter = main_loop_time/(par.iter_mpc+1);
+    printresult.v_end = OptRes.xx(1,end);
+    printresult.SoC_end = OptRes.xx(2,end)/par.E_bat_max
 
 end
