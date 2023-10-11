@@ -256,6 +256,10 @@ function [par, OptRes] = run_simulation_mpc_online(par, weather, args, f, solver
         iter_time_2 = toc(iter_time_2);
         iter_time_3 = toc(iter_time_3);
         OptRes.iter_time = [OptRes.iter_time; iter_time_3];
+
+        if kbhit()
+            break;
+        end
     end
 
     %% Check if it was always feasible
@@ -273,5 +277,22 @@ function [par, OptRes] = run_simulation_mpc_online(par, weather, args, f, solver
     printresult.SoC_end = OptRes.xx(2,end)/par.E_bat_max
 
 
+end
 
+
+function key_pressed = kbhit()
+    key_pressed = false;
+    if kbhit_available
+        key_pressed = true;
+    end
+end
+
+function available = kbhit_available
+    available = exist('OCTAVE_VERSION', 'builtin') == 5; % Check if it's Octave
+    if ~available
+        available = exist('OCTAVE_VERSION', 'var') ~= 0; % Check if it's MATLAB
+    end
+    if ~available
+        available = exist('Kbh', 'file') == 2; % Check if Kbh is a file in the current folder
+    end
 end

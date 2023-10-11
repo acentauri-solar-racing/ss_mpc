@@ -1,20 +1,6 @@
-function plotOptTrajectory(OptRes, par, s, x0)
+function plotOptTrajectory(onlineFig, OptRes, par, s, x0)
     % Check if it's the first iteration and create the figure and subplots
-    if par.iter_mpc == 0
-        figure; % Create a new figure
-
-        % Create the first subplot for OptRes.xx(1, :)
-        subplot(3, 1, 1);
-        hold on;
-
-        % Create the second subplot for OptRes.xx(2, :)
-        subplot(3, 1, 2);
-        hold on;
-
-        % Create the third subplot for OptRes.u_cl(:,1)
-        subplot(3, 1, 3);
-        hold on;
-    end
+    onlineFig
 
     % Clear the current subplot
     clf;
