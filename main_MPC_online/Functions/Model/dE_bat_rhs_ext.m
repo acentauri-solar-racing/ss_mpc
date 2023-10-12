@@ -11,17 +11,35 @@ function dE_bat = dE_bat_rhs_ext(par, states, controls, var)
     % states x and control u
     v = states(1);              % velocity
     E_bat = states(2);            % state of charge
+    t = states(3);
+
     P_mot_el = controls(1);     % electric motor power
     
     % space dependent parameters
-    alpha = var(1);             % road inclination
-    G = var(2);                 % irradiation
-    v_front = var(3);           % front wind velocity
-    v_side = var(4);            % side wind velocity
-    theta_amb = var(5);
-    v_eff_front = v_front + v;
-    v_eff_side = v_side;
-    v_eff = sqrt(v_eff_side^2 + v_eff_front^2);
+
+    % road inclination
+    alpha = var(1);             
+    
+    % solar irradiation
+    G_1 = var(2);
+    G_2 = var(3);
+    G_3 = var(4);
+    G = G_1*(t/60/15)^2 + G_2*(t/60/15) + G_3;
+
+    fW_1 = var(5);
+    fW_2 = var(6);
+    fW_3 = var(7);
+    fW = fW_1*(t/60/15)^2 + fW_2*(t/60/15) + fW_3;          
+
+    sW_1 = var(8);
+    sW_2 = var(9);
+    sW_3 = var(10);
+    sW = sW_1*(t/60/15)^2 + sW_2*(t/60/15) + sW_3;       
+
+    temp_1 = var(11);
+    temp_2 = var(12);
+    temp_3 = var(13);
+    temp = temp_1*(t/60/15)^2 + temp_2*(t/60/15) + temp_3;       
 
     theta_NOCT = 50;             % [°C]
     S = 80;                     % [mW/cm^2]
