@@ -37,7 +37,7 @@ par = load_route(par);
 % add DP solution
 par = load_DP(par, par.s_step_DP, 'OfflineData\Full_Race_20230607_9h_30min.mat');
 % add weather data 
-weather = load_weather(weather, par.t_0, 0);
+weather = load_weather(weather, par.t_0, 1);
 
 %% Define variables for optimizer CasaDi
 [par, mpc.f, mpc.obj, mpc.X, mpc.U, mpc.P, mpc.S1, mpc.S2] = initialize_mpc(par);

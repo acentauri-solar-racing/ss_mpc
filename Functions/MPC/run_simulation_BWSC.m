@@ -128,18 +128,18 @@ function [par, weather, OptRes] = run_simulation_BWSC(par, weather, args, solver
     E_bat_idx = 2:par.n_states:par.n_states*(par.N+1);
     args.lbx(E_bat_idx(end),1) = SoC_target*par.E_bat_max -par.E_bat_max*0.00001;  
 
-    args.ubx(E_bat_idx(end),1) = par.E_bat_max;  
-    if SoC_target == -1
-        args.lbx(E_bat_idx(end),1) = par.E_bat_target_DP(1+par.iter_initial+par.N) -par.E_bat_max*0.00001;  
-        %args.ubx(E_bat_idx(end),1) = par.E_bat_target_DP(1+par.iter_initial+par.N) +par.E_bat_max*0.00001;  
-    end
+%     args.ubx(E_bat_idx(end),1) = par.E_bat_max;  
+%     if SoC_target == -1
+%         args.lbx(E_bat_idx(end),1) = par.E_bat_target_DP(1+par.iter_initial+par.N) -par.E_bat_max*0.00001;  
+%         %args.ubx(E_bat_idx(end),1) = par.E_bat_target_DP(1+par.iter_initial+par.N) +par.E_bat_max*0.00001;  
+%     end
 
 
-    % slack variable, they are 0 in the NLP
-    args.lbx(par.n_states*(par.N+1)+par.n_controls*par.N +1,1) = 0; 
-    args.ubx(par.n_states*(par.N+1)+par.n_controls*par.N +1,1) = 0; 
-    args.lbx(par.n_states*(par.N+1)+par.n_controls*par.N +2,1) = 0; 
-    args.ubx(par.n_states*(par.N+1)+par.n_controls*par.N +2,1) = 0; 
+    % slack variables
+%     args.lbx(par.n_states*(par.N+1)+par.n_controls*par.N +1,1) = 0; 
+%     args.ubx(par.n_states*(par.N+1)+par.n_controls*par.N +1,1) = inf; 
+%     args.lbx(par.n_states*(par.N+1)+par.n_controls*par.N +2,1) = 0; 
+%     args.ubx(par.n_states*(par.N+1)+par.n_controls*par.N +2,1) = 0; 
     %% Simulation Loop
     
     % measure computational time
@@ -159,6 +159,7 @@ function [par, weather, OptRes] = run_simulation_BWSC(par, weather, args, solver
     
     % get optimal input trajectory
     u = reshape(full(sol.x(par.n_states*(par.N+1)+1:end-2))',par.n_controls,par.N)';
+    slack = reshape(full(sol.x(end-1))',1,1)';
     % store first optimal input
     OptRes.u_cl= [OptRes.u_cl ; u(:,:)];
     
@@ -170,7 +171,7 @@ function [par, weather, OptRes] = run_simulation_BWSC(par, weather, args, solver
     
     main_loop_time = toc(main_loop);
     OptRes.nlp_time = main_loop_time;
-
+    
 %     %% Print info on time elapsed in real life and simulation, computational time
       printresults.computational_time = toc(main_loop);
 %     OptRes.online_time = main_loop_time;
@@ -179,6 +180,8 @@ function [par, weather, OptRes] = run_simulation_BWSC(par, weather, args, solver
 %     printresult.average_nlp_time_computation_iter = main_loop_time;
 %     printresult.v_end = OptRes.xx(1,end);
 %     printresult.SoC_end = OptRes.xx(2,end)/par.E_bat_max
+    fprintf('slack variable = %d \n', slack);
+    fprintf('computational time = %d s\n', main_loop_time);
 
 
 

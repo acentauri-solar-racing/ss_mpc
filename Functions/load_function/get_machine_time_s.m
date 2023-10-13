@@ -14,5 +14,7 @@
 function t_0 = get_machine_time_s()
     format = 'HHMM';
     hourstr = datestr(datetime,format);
+    hour_print = datestr(datetime,'HH:MM');
     t_0 = str2num(hourstr(1:2))*60*60+str2num(hourstr(3:4))*60;
+    fprintf('time machine: %s \n', hour_print)
 end
