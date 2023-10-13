@@ -22,10 +22,10 @@
 
 
 function [weather] = load_weather(weather, t_machine)
-    % create weather struct
-    %% Set up the Import Options and import the data
+    % get latest weather folder
     weatherfolderpath = get_latest_weather('G:\Shared drives\AlphaCentauri\SolarCar_22 23\6. Strategy & Simulation\ss_online_data\Forecast\');
 
+    %% Set up the Import Options and import the data
     opts = delimitedTextImportOptions("NumVariables", 11);
     
     % Specify range and delimiter

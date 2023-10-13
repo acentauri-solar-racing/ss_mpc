@@ -109,7 +109,7 @@ function [par, weather, OptRes] = run_simulation_BWSC(par, weather, args, solver
                            weather.p_temp(3)
                            ];
     
-    % initialize minimal/maximal velocity constraint
+    % initialize minimal/maximal velocity constraint over N
     args.lbx(1:par.n_states:par.n_states*(par.N+1),1) = par.v_min; %par.route.min_v(par.iter_initial+1:par.iter_initial+par.N+1);
     args.ubx(1:par.n_states:par.n_states*(par.N+1),1) = par.route.max_v(par.iter_initial+1:par.iter_initial+par.N+1);
     

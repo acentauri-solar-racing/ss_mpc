@@ -135,8 +135,10 @@ function [par, g_nlp, args] = initialize_constraints_mpc(par, f, X, U, P, S1, S2
     args.ubg(par.n_states*(par.N+1)+2:par.n_states*(par.N+1)+1+par.N+1) = inf;  
     
     %% initialize boundary constraints to optimization variables vector
+    % constraints values are initialized in the get_car_param file in
+    % ss_offline_data
 
-    % state velocity
+    % state velocity constraints (they will be updated in "run_simulation")
     args.lbx(1:par.n_states:par.n_states*(par.N+1),1) = 0;                    
     args.ubx(1:par.n_states:par.n_states*(par.N+1),1) = 40;                     
     

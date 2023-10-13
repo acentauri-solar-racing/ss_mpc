@@ -14,6 +14,7 @@ function dE_bat = dE_bat_rhs_ext(par, states, controls, var)
     t = states(3);
 
     P_mot_el = controls(1);     % electric motor power
+    P_brake = controls(2);
     
     % space dependent parameters
 
