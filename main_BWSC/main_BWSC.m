@@ -15,6 +15,7 @@ addpath('..\..\ss_offline_data\route\BWSC');
 addpath('..\..\ss_offline_data\parameters');
 addpath('..\..\ss_offline_data\route');
 
+addpath('..\functions\');
 addpath('..\functions\Plot');
 addpath('..\functions\MPC');
 addpath('..\functions\Model');
