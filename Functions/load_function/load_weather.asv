@@ -3,16 +3,12 @@
 % versions, last updated: 11.10.2023
 %% Description 
 % This function loads weatherdata from a certain folder; 
-% IT'S IMPORTANT THAT "TIME MACHINE" > "WEATHER FORECAST START TIME", of
-% the same day
+% IT'S IMPORTANT THAT "TIME MACHINE" > "WEATHER FORECAST START TIME"
 
 % INPUT : 
+% "weatherfolderpath": string, folder path that contains the csv weather
 % "t_0" [s]: actual time machine (time on the computer clock)
 % "weather": weather struct
-% "n_day": the day with respect the first day of data. n_day = 0 means you
-% use the date of the first day until midnight the data; n_day = 1 would
-% mean ignore the data of the first day and use the data of the day
-% tomorrow, and so on
 
 % OUTPUT : 
 % "timeline (time)": vector that contains the time column resolution of the data
@@ -57,10 +53,11 @@ function [weather] = load_weather(weather, t_0, n_day)
     rho_table = readtable(weatherfolderpath + "airDensity.csv", opts);
     
     % Get time vector as string
-    weather.fulldate_string = cell2mat(table2array(G_table(2:end,1)));
+    fulldate_string = cell2mat(table2array(G_table(2:end,1)));
     % get hour in "HHMM" format
-    timeline_string = weather.fulldate_string(:,[12,13,15,16]);
+    timeline_string = fulldate_string(:,[12,13,15,16]);
     weather.timeline_string = timeline_string;
+    weather.day_string = fulldate_string(:,[1:4,6:7,9:10]);
     weather.timeline = [];
     
     % convert time vector string into seconds
@@ -86,7 +83,7 @@ function [weather] = load_weather(weather, t_0, n_day)
     if n_day == 0;
         % keep weather data from start of datatime until midnight
         if ~isempty(zero_rows)
-            idx_midnight = find(zero_rows, 1)-1;
+            idx_midnight = find(zero_rows, 1);
 
             weather.G_data =  cellfun(@str2num,table2array(G_table(2:idx_midnight, 2:end)));
             weather.fW_data = cellfun(@str2num,table2array(fW_table(2:idx_midnight, 2:end)));
@@ -95,7 +92,7 @@ function [weather] = load_weather(weather, t_0, n_day)
             weather.rho_data = cellfun(@str2num,table2array(rho_table(2:idx_midnight, 2:end)));
             weather.timeline = weather.timeline(1:idx_midnight-1);
             weather.timeline_string = weather.timeline_string(1:idx_midnight-1,:);
-            weather.fulldate_string = weather.fulldate_string(1:idx_midnight-1,:);
+            weather.day_string = weather.day_string(1:idx_midnight-1,:);
 
         else  
             weather.G_data =  cellfun(@str2num,table2array(G_table(2:end, 2:end)));
@@ -103,14 +100,14 @@ function [weather] = load_weather(weather, t_0, n_day)
             weather.sW_data = cellfun(@str2num,table2array(sW_table(2:end, 2:end)));
             weather.temp_data = cellfun(@str2num,table2array(temp_table(2:end, 2:end)));
             weather.rho_data = cellfun(@str2num,table2array(rho_table(2:end, 2:end)));
-            weather.timeline = weather.timeline(1:idx_midnight-1);
+                        weather.timeline = weather.timeline(1:idx_midnight-1);
             weather.timeline_string = weather.timeline_string(1:idx_midnight-1,:);
-            weather.fulldate_string = weather.fulldate_string(1:idx_midnight-1,:);
+            weather.day_string = weather.day_string(1:idx_midnight-1,:);
         end
     else
         idx_midnight = find(zero_rows, n_day+1);
-        idx_start = idx_midnight(end-1);
-        idx_end = idx_midnight(end)-1;
+        idx_start = idx_midnight(1);
+        idx_end = idx_midnight(2);
 
         weather.G_data =  cellfun(@str2num,table2array(G_table(1+idx_start:1+idx_end, 2:end)));
         weather.fW_data = cellfun(@str2num,table2array(fW_table(1+idx_start:1+idx_end, 2:end)));
@@ -118,16 +115,19 @@ function [weather] = load_weather(weather, t_0, n_day)
         weather.temp_data = cellfun(@str2num,table2array(temp_table(1+idx_start:1+idx_end, 2:end)));
         weather.rho_data = cellfun(@str2num,table2array(rho_table(1+idx_start:1+idx_end, 2:end)));
         weather.timeline = weather.timeline(idx_start:idx_end);
-        weather.timeline_string = weather.timeline_string(idx_start:idx_end,:);
-        weather.fulldate_string = weather.fulldate_string(idx_start:idx_end,:);
+        weather.timeline_string = weather.timeline_string(idx_start:idx_end);
+        weather.day_string = weather.day_string(idx_start:idx_end);
+
+
+
+
     end
 
     
     % Get data after your actual time (remove previous data) from the floor time wrt to yours; e.g. if you are at 9.35, get data from 9.30
     idx_overtime = find(weather.timeline > t_0-7.5*60);
     weather.timeline = weather.timeline(idx_overtime,:);
-    weather.timeline_string = weather.timeline_string(idx_overtime:end,:);
-    weather.fulldate_string = weather.fulldate_string(idx_overtime:end,:);    
+    weather.timeline_string = weather.timeline_string(idx_overtime,:);
     weather.G_data = weather.G_data(idx_overtime,:);
     weather.fW_data = weather.fW_data(idx_overtime,:);
     weather.sW_data = weather.sW_data(idx_overtime,:);
