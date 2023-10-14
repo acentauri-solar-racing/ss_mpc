@@ -120,8 +120,8 @@ function [par, weather, OptRes] = run_simulation_BWSC(par, weather, args, solver
     args.ubx(v_idx(end),1) = velocity_target +0.001;                     
     
     if velocity_target == -1
-        args.lbx(v_idx(end),1) = 60/3.6;                    
-        args.ubx(v_idx(end),1) = par.route.max_v(par.iter_initial+par.N+1); 
+        args.lbx(v_idx(end),1) = par.route.max_v(par.iter_initial+par.N+1)*par.v_end_lb_percentage;                    
+        args.ubx(v_idx(end),1) = par.route.max_v(par.iter_initial+par.N+1)*par.v_end_ub_percentage; 
     end
 
     % state battery energy target at the end distance
