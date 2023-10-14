@@ -4,10 +4,12 @@
 % 3. initialize_constraints
 % 4. initialize_solver
 % 2. run_simulation
-clear all
-close all
 clc
+clear
+clearvars
+close all
 
+addpath(genpath('.\..\Functions\Casadi\..'));
 import casadi.*
 
 warning('off');
@@ -20,6 +22,7 @@ addpath('..\functions\Plot');
 addpath('..\functions\MPC');
 addpath('..\functions\Model');
 addpath('..\functions\load_function');
+addpath(genpath('..\functions\Casadi'));
 
 
 addpath("OfflineData\");
