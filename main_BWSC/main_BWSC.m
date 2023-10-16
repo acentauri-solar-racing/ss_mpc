@@ -9,7 +9,7 @@ clear
 clearvars
 close all
 
-addpath(genpath('.\..\Functions\Casadi\..'));
+addpath(genpath('.\..\Functions\..'));
 import casadi.*
 
 warning('off');
