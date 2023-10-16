@@ -5,6 +5,7 @@ function [weather] = load_weather_benchmark(weather)
     t = [0:1:16]; % 1 = 15 min : 1 = 15  min : 16 = 240 min = 4 h
     weather.timeline = t;
     G_nlp = -2.1*t.^2+62*t+420;
+    
     weather.G_nlp = G_nlp';
     G_mpc1 = -2.2*t(1:4).^2+70*t(1:4)+380;
     G_mpc1 = G_mpc1';

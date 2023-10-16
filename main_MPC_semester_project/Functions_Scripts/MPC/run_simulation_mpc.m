@@ -83,10 +83,10 @@ function [par, OptRes] = run_simulation_mpc(par, weather, args, f, solver, s_0, 
     SoC_target = par.E_bat_target_DP;
     
     % initialize polynomial fit of G, fW
-    [par.G_1, par.G_2, par.G_3] = get_poly(weather.G_nlp, 0, 60*15*4*4);
-    [par.fW_1, par.fW_2, par.fW_3] = get_poly(weather.fW_nlp, 0, 60*15*4*4);
-    [par.sW_1, par.sW_2, par.sW_3] = get_poly(weather.sW_nlp, 0, 60*15*4*4);
-    [par.temp_1, par.temp_2, par.temp_3] = get_poly(weather.temp_nlp, 0, 60*15*4*4);
+    [par.G_1, par.G_2, par.G_3] = get_poly(weather.G_mpc, 0, 60*15*4*4);
+    [par.fW_1, par.fW_2, par.fW_3] = get_poly(weather.fW_mpc, 0, 60*15*4*4);
+    [par.sW_1, par.sW_2, par.sW_3] = get_poly(weather.sW_mpc, 0, 60*15*4*4);
+    [par.temp_1, par.temp_2, par.temp_3] = get_poly(weather.temp_mpc, 0, 60*15*4*4);
 
     [par.G_1r, par.G_2r, par.G_3r] = get_poly(weather.G_nlp, 0, 60*15*4*4);
     [par.fW_1r, par.fW_2r, par.fW_3r] = get_poly(weather.fW_nlp, 0, 60*15*4*4);
@@ -222,5 +222,7 @@ function [par, OptRes] = run_simulation_mpc(par, weather, args, f, solver, s_0, 
 
     par.final_velocity = OptRes.xx(1,end);
     par.final_E_bat = OptRes.xx(2,end);
+
+    
 
 end

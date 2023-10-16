@@ -127,13 +127,21 @@ function [weather] = load_weather(weather, t_0, n_day)
     idx_overtime = find(weather.timeline > t_0-7.5*60);
     weather.timeline = weather.timeline(idx_overtime,:);
     weather.timeline_string = weather.timeline_string(idx_overtime:end,:);
-    weather.fulldate_string = weather.fulldate_string(idx_overtime:end,:);    
+    weather.fulldate_string = weather.fulldate_string(idx_overtime:end,:);
     weather.G_data = weather.G_data(idx_overtime,:);
     weather.fW_data = weather.fW_data(idx_overtime,:);
     weather.sW_data = weather.sW_data(idx_overtime,:);
     weather.rho_data = weather.rho_data(idx_overtime,:);
     weather.temp_data = weather.temp_data(idx_overtime,:);
 
+    % Extract the year, month, and day components
+    dateStr = weather.fulldate_string(1, 1:10);
+    
+    % Convert the date string to a date object
+    dateObj = datetime(dateStr, 'InputFormat', 'yyyy-MM-dd');
+    
+    % Format the date object as 'dd-MM-yyyy' and store it in the cell array
+    weather.ddmmyy_string = datestr(dateObj, 'dd-mm-yyyy');
 
     %% Clear temporary variables
     clear opts

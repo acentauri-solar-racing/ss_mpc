@@ -36,7 +36,7 @@ function solver = initialize_solver_mpc(par, obj, g_nlp, X, U, P, S1, S2)
     
     % solver options
     opts = struct;
-    opts.ipopt.max_iter = 2000;
+    opts.ipopt.max_iter = 10000;
     opts.ipopt.print_level = 3;     %0,3,5
     opts.print_time = 0;
     opts.ipopt.acceptable_tol =1e-8; %1e-8

@@ -24,7 +24,6 @@ addpath('..\functions\Model');
 addpath('..\functions\load_function');
 addpath(genpath('..\functions\Casadi'));
 
-
 addpath("OfflineData\");
 addpath("OnlineData\");
 
