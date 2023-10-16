@@ -18,3 +18,15 @@ function save_file = save_file_BWSC(OptRes, par, weather)
     writematrix([horzcat(OptRes.xdist, OptRes.xx)],'G:\Shared drives\AlphaCentauri\SolarCar_22 23\6. Strategy & Simulation\ss_online_data\MPC_optimal\BWSC_'+par.filename+'\BWSC_'+par.filename+'_states.csv')
     writematrix([horzcat(OptRes.xdist(2:end), OptRes.u_cl)],'G:\Shared drives\AlphaCentauri\SolarCar_22 23\6. Strategy & Simulation\ss_online_data\MPC_optimal\BWSC_'+par.filename+'\BWSC_'+par.filename+'_inputs.csv')
 end
+
+%     % save mat file with OptRes, par and weather
+%     currentDateTime = datetime('now');
+%     timestamp = datestr(currentDateTime, 'yyyymmdd_HHMMSS');
+%     directory = 'G:\Shared drives\AlphaCentauri\SolarCar_22 23\6. Strategy & Simulation\ss_online_data\MPC_optimal\';
+%     filename = [directory, timestamp, '_MPC'];
+%     mkdir(filename);
+%     filename = [filename, timestamp, '_MPC'];
+%     save('G:\Shared drives\AlphaCentauri\SolarCar_22 23\6. Strategy & Simulation\ss_online_data\MPC_optimal\BWSC_'+par.filename+'\BWSC_'+par.filename, "OptRes","par","weather")
+%     writematrix([horzcat(OptRes.xdist, OptRes.xx)],'G:\Shared drives\AlphaCentauri\SolarCar_22 23\6. Strategy & Simulation\ss_online_data\MPC_optimal\BWSC_'+par.filename+'\BWSC_'+par.filename+'_states.csv')
+%     writematrix([horzcat(OptRes.xdist(2:end), OptRes.u_cl)],'G:\Shared drives\AlphaCentauri\SolarCar_22 23\6. Strategy & Simulation\ss_online_data\MPC_optimal\BWSC_'+par.filename+'\BWSC_'+par.filename+'_inputs.csv')
+
