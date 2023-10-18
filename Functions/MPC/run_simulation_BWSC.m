@@ -50,7 +50,7 @@ function [par, weather, OptRes] = run_simulation_BWSC(par, weather, args, solver
     par.iter_initial = round(s_0/par.s_step);
     v_0 = par.route.max_v(par.iter_initial+1)*0.95;
     % initial state of charge (value took from SoC target)
-    SoC_0 = par.E_bat_target_DP(1+par.iter_initial)/par.E_bat_max;
+    SoC_0 = par.E_bat_target_DP(1+par.iter_initial)/par.E_bat_max*0.8;
 
     % initial conditions vector
     x0 = [v_0 ; SoC_0*par.E_bat_max; t_0];  

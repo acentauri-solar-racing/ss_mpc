@@ -57,4 +57,4 @@ mpc.solver = initialize_solver_mpc(par, mpc.obj, mpc.g, mpc.X, mpc.U, mpc.P, mpc
 visualize_plot_BWSC(par, weather, OptRes)
 
 %% Save file
-save_file_BWSC(OptRes, par, weather)
+% save_file_BWSC(OptRes, par, weather)
