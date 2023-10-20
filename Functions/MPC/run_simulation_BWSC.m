@@ -48,7 +48,7 @@ function [par, weather, OptRes] = run_simulation_BWSC(par, weather, args, solver
     s_0 = par.s_0;
     t_0 = par.t_0;
     par.iter_initial = round(s_0/par.s_step);
-    v_0 = par.v_0;
+%     v_0 = par.v_0;
     SoC_0 = par.SoC_0;
 
     v_0 = par.route.max_v(par.iter_initial+1)*0.95;
