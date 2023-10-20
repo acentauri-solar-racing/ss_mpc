@@ -22,11 +22,18 @@ end
 state = table(newTimeStrings, OptRes.xdist,OptRes.xx(:,1)*3.6,OptRes.xx(:,2)/par.E_bat_max, 'VariableNames',{'time';'cumDistance';'velocity';'soc'});
 input = table(newTimeStrings(2:end,:), OptRes.xdist(2:end),OptRes.u_cl(:,1),OptRes.u_cl(:,2), 'VariableNames',{'time';'cumDistance';'inputElectricMotorPower';'inputBrakePower'});
 
-mkdir('G:\Shared drives\AlphaCentauri\SolarCar_22 23\6. Strategy & Simulation\ss_online_data\MPC_optimal\'+par.filename+'_NLP')
-save('G:\Shared drives\AlphaCentauri\SolarCar_22 23\6. Strategy & Simulation\ss_online_data\MPC_optimal\'+par.filename+'_NLP\'+par.filename, "OptRes","par","weather")
+mkdir('G:\Shared drives\AlphaCentauri\SolarCar_22 23\6. Strategy & Simulation\ss_online_data\MPC_optimal\Saved Data\'+par.filename+'_NLP')
+save('G:\Shared drives\AlphaCentauri\SolarCar_22 23\6. Strategy & Simulation\ss_online_data\MPC_optimal\Saved Data\'+par.filename+'_NLP\'+par.filename, "OptRes","par","weather")
 
-writetable(state,'G:\Shared drives\AlphaCentauri\SolarCar_22 23\6. Strategy & Simulation\ss_online_data\MPC_optimal\'+par.filename+'_NLP\'+par.filename+'_state_NLP.csv')
-writetable(input,'G:\Shared drives\AlphaCentauri\SolarCar_22 23\6. Strategy & Simulation\ss_online_data\MPC_optimal\'+par.filename+'_NLP\'+par.filename+'_input_NLP.csv')
+writetable(state,'G:\Shared drives\AlphaCentauri\SolarCar_22 23\6. Strategy & Simulation\ss_online_data\MPC_optimal\Saved Data\'+par.filename+'_NLP\'+par.filename+'_state_NLP.csv')
+writetable(input,'G:\Shared drives\AlphaCentauri\SolarCar_22 23\6. Strategy & Simulation\ss_online_data\MPC_optimal\Saved Data\'+par.filename+'_NLP\'+par.filename+'_input_NLP.csv')
+
+directory = 'G:\Shared drives\AlphaCentauri\SolarCar_22 23\6. Strategy & Simulation\ss_online_data\MPC_optimal\CSV\';
+currentDateTime = datetime('now');
+timestamp = datestr(currentDateTime, 'yyyymmdd_HHMMSS');
+filename = [directory, timestamp, '_NLP.csv'];
+writetable(state,filename,'Delimiter',',');
+% writetable(state,'G:\Shared drives\AlphaCentauri\SolarCar_22 23\6. Strategy & Simulation\ss_online_data\MPC_optimal\CSV\'+par.filename+'_NLP.csv')
 
 %writematrix([vertcat(OptRes.xdist(2:end), OptRes.u_cl')],'G:\Shared drives\AlphaCentauri\SolarCar_22 23\6. Strategy & Simulation\ss_online_data\MPC_optimal\'+par.filename+'_NLP\'+par.filename+'_inputs_NLP.csv')
 end
