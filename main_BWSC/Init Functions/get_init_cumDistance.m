@@ -15,5 +15,5 @@ function cumDistance = get_init_cumDistance()
     data = readtable(fullFilePath, 'Delimiter', ',');
 
     % 6. Getting latest value
-    cumDistance = data(end,4);
+    cumDistance = table2array(data(end,4));
 end

@@ -15,5 +15,5 @@ function SoC = get_init_soc()
     data = readtable(fullFilePath, 'Delimiter', ',');
 
     % 6. Getting latest value
-    SoC = data(end,2);
+    SoC = table2array(data(end,2));
 end

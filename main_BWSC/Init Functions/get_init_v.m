@@ -15,5 +15,5 @@ function Velocity = get_init_v()
     data = readtable(fullFilePath, 'Delimiter', ',');
 
     % 6. Getting latest value
-    Velocity = data(end,2);
+    Velocity = table2array(data(end,2))/3.6;
 end
